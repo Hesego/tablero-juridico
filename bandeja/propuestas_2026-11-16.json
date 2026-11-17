@@ -1,0 +1,193 @@
+{
+ "revisado_hasta": "16/11/2026",
+ "propuestas": [
+  {
+   "id": "<BY5PR12MB4227886603F00D72FAD4A60FB77F2@BY5PR12MB4227.namprd12.prod.outlook.com>",
+   "fecha_correo": "2026-11-13T20:24:34Z",
+   "de": "Notificaciones (Juzgado 02 Civil Municipal de Chaparral)",
+   "asunto_correo": "RV: NOTIFICACIÓN AUTO ADMITE ACCIÓN DE TUTELA RAD. 2026-00276-00",
+   "resumen": "Auto que admite la tutela de Heidi Julieth Oviedo Prieto contra ARL AXA Colpatria, HESEGO y Clínica Uros. Término: 2 días hábiles siguientes a la notificación (13/11 15:19). 16/11 es festivo → vence el 18/11/2026. No hay respuesta enviada.",
+   "enlace": "https://outlook.office365.com/owa/?ItemID=AAMkADRmODQxOGQzLTVmY2UtNDU5ZC05YjU1LTI5NDNjNmQ0N2ZlOQBGAAAAAABGnBwQGXZsSosylKjYsitmBwBMMzN3lbEpQZnOZ7oTCU7zAAAAAAEMAABMMzN3lbEpQZnOZ7oTCU7zAACwpC2SAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
+   "accion": "NUEVO",
+   "confianza": "ALTA",
+   "motivo": "Notificación judicial de tutela contra HESEGO; no aparece en la matriz.",
+   "campos": {
+    "B": "TUTELAS",
+    "C": "Heidi Julieth Oviedo Prieto",
+    "E": "Acción de tutela Rad. 2026-00276-00 contra ARL AXA Colpatria, HESEGO INGENIERÍA S.A.S. y Clínica Uros – Neiva. Juzgado 02 Civil Municipal de Chaparral. Término de 2 días hábiles para pronunciarse.",
+    "F": "CHAPARRAL",
+    "G": "13/11/2026",
+    "H": "HABIL",
+    "I": "18/11/2026",
+    "M": "Juzgado 02 Civil Municipal de Chaparral",
+    "N": "MEDIO",
+    "Q": "13/11/2026 Notificación del auto admisorio recibida por notificaciones@ y remitida a Jurídica. Vence 18/11/2026 (16/11 festivo)."
+   }
+  },
+  {
+   "id": "<CH2PR12MB48591A8A7A667734778A7B2DAC7F2@CH2PR12MB4859.namprd12.prod.outlook.com>",
+   "fecha_correo": "2026-11-13T12:17:05Z",
+   "de": "Milena Gomez <mgomez@hesegoingenieria.com>",
+   "asunto_correo": "SOLICITUD DE REVISIÓN DE CASOS – REGRESO ANTICIPADO DE COLABORADORES DE TOLIMA",
+   "resumen": "Remite versiones escritas de 2 de 3 técnicos de Zarzal citados a descargos por regresar el 5/11 de El Espinal (debían quedarse hasta el 7/11). Pide validar si procede continuar los procesos, considerando problemas de alimentación, alojamiento, viáticos y agua.",
+   "enlace": "https://outlook.office365.com/owa/?ItemID=AAMkADRmODQxOGQzLTVmY2UtNDU5ZC05YjU1LTI5NDNjNmQ0N2ZlOQBGAAAAAABGnBwQGXZsSosylKjYsitmBwBMMzN3lbEpQZnOZ7oTCU7zAAAAAAEMAABMMzN3lbEpQZnOZ7oTCU7zAACwpC16AAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
+   "accion": "NUEVO",
+   "confianza": "ALTA",
+   "motivo": "Solicitud dirigida a Sebastián (@mención) para revisar procesos disciplinarios; sin respuesta enviada.",
+   "campos": {
+    "B": "PROCESOS DISCIPLINARIOS",
+    "C": "Hugo Pardo, Carlos Sánchez y otro (técnicos Zarzal)",
+    "E": "Validar si procede continuar los procesos disciplinarios por regreso anticipado desde la sede El Espinal (5/11 en lugar del 7/11), considerando las condiciones de alimentación, alojamiento y viáticos reportadas.",
+    "F": "ZARZAL",
+    "G": "13/11/2026",
+    "M": "Milena Gomez",
+    "Q": "13/11/2026 Gestión Humana remite versiones escritas de 2 de los 3 colaboradores."
+   }
+  },
+  {
+   "id": "<SN7PR12MB814582C66AE53025DE44C77ABF7F2@SN7PR12MB8145.namprd12.prod.outlook.com>",
+   "fecha_correo": "2026-11-13T14:12:52Z",
+   "de": "Angie Katherine Castaño <acastano@hesegoingenieria.com>",
+   "asunto_correo": "RV: PROVIDENCIA - DESPACHO JUDICIAL 3 JUZGADO ADMTVO. CTO. DE FLORENCIA - 18001300707220241691902",
+   "resumen": "UPME comunica auto que decreta pruebas (Juzgado 3° Administrativo de Florencia, Rad. 18001300707220241691902). Angie no tiene conocimiento. Sebastián respondió el 13/11 a UPME indicando que el adjunto no se puede abrir.",
+   "enlace": "https://outlook.office365.com/owa/?ItemID=AAMkADRmODQxOGQzLTVmY2UtNDU5ZC05YjU1LTI5NDNjNmQ0N2ZlOQBGAAAAAABGnBwQGXZsSosylKjYsitmBwBMMzN3lbEpQZnOZ7oTCU7zAAAAAAEMAABMMzN3lbEpQZnOZ7oTCU7zAACwpC17AAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
+   "accion": "NUEVO",
+   "confianza": "MEDIA",
+   "motivo": "Comunicación judicial; falta confirmar si HESEGO es parte del proceso.",
+   "campos": {
+    "B": "GESTION JURIDICA",
+    "C": "Correspondencia UPME",
+    "E": "Verificar comunicación del Juzgado 3° Administrativo del Circuito de Florencia (Rad. 18001300707220241691902) remitida por UPME: auto que decreta pruebas. Establecer si HESEGO es parte.",
+    "F": "GENERAL",
+    "G": "13/11/2026",
+    "K": "13/11/2026",
+    "M": "UPME",
+    "Q": "13/11/2026 Se responde a UPME que el adjunto no puede abrirse y se solicita reenvío legible."
+   }
+  },
+  {
+   "id": "<SJ0PR12MB6784E4BF0350CC34CB2824FDD87F2@SJ0PR12MB6784.namprd12.prod.outlook.com>",
+   "fecha_correo": "2026-11-12T13:32:51Z",
+   "de": "Sebastian Toro Grajales (gestión propia) / Cancillería",
+   "asunto_correo": "SOLICITUD DE APOSTILLA EN LÍNEA – Ecuador",
+   "resumen": "Apostillas del certificado de existencia y representación legal y de documentos corporativos para licitar en Ecuador: registradas el 12/11 y 13/11, aprobadas el 12/11 y 13/11; pago gestionado con Contabilidad ($37.800).",
+   "enlace": "https://outlook.office365.com/owa/?ItemID=AAMkADRmODQxOGQzLTVmY2UtNDU5ZC05YjU1LTI5NDNjNmQ0N2ZlOQBGAAAAAABGnBwQGXZsSosylKjYsitmBwBMMzN3lbEpQZnOZ7oTCU7zAAAAAAEJAABMMzN3lbEpQZnOZ7oTCU7zAACwpHBnAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
+   "accion": "NUEVO",
+   "confianza": "MEDIA",
+   "motivo": "Gestión jurídica realizada por Sebastián (apostillas para Ecuador) que no aparece en la matriz.",
+   "campos": {
+    "B": "GESTION JURIDICA",
+    "C": "Katherine Segura Perez",
+    "E": "Apostilla del certificado de existencia y representación legal y documentos corporativos de HESEGO para licitar en Ecuador.",
+    "F": "GENERAL",
+    "G": "12/11/2026",
+    "K": "13/11/2026",
+    "M": "Katherine Segura Perez",
+    "Q": "12/11/2026 y 13/11/2026 apostillas registradas y aprobadas por Cancillería (destino Ecuador). Pago solicitado a Contabilidad."
+   }
+  },
+  {
+   "id": "<DSVPR12MB449095754FAA0D055F3C853D41BB7F2@DSVPR12MB449095.namprd12.prod.outlook.com>",
+   "fecha_correo": "2026-11-13T13:30:59Z",
+   "de": "Luz Marina Lopez Erazo <llopez@hesegoingenieria.com>",
+   "asunto_correo": "RV: HesOne>Nómina Solicitudes que van por control de cambios (GH y Nómina)",
+   "resumen": "Remite correo de Páramo con posibles controles de cambio de GH-Nómina en el ERP HesOne; pide revisión para responder el martes con hechos y datos (importancia alta).",
+   "enlace": "https://outlook.office365.com/owa/?ItemID=AAMkADRmODQxOGQzLTVmY2UtNDU5ZC05YjU1LTI5NDNjNmQ0N2ZlOQBGAAAAAABGnBwQGXZsSosylKjYsitmBwBMMzN3lbEpQZnOZ7oTCU7zAAAAAAEMAABMMzN3lbEpQZnOZ7oTCU7zAACwpC14AAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
+   "accion": "NUEVO",
+   "confianza": "MEDIA",
+   "motivo": "Solicitud de revisión dirigida a Sebastián y GH en el marco del contrato ERP; sin respuesta enviada.",
+   "campos": {
+    "B": "REVISION DOCUMENTAL Y CONCEPTO JURIDICO",
+    "C": "Luz Marina Lopez Erazo",
+    "E": "Revisar las solicitudes de control de cambios de GH y Nómina propuestas por Páramo Digital (proyecto ERP HesOne) para responder con soporte contractual.",
+    "F": "GENERAL",
+    "G": "13/11/2026",
+    "M": "Luz Marina Lopez Erazo",
+    "Q": "13/11/2026 Luz Marina remite correo de Páramo para revisión; respuesta conjunta prevista para el martes 17/11."
+   }
+  },
+  {
+   "id": "<PH7PR12MB676356E6DF279A687D1D4283D8702@PH7PR12MB6763.namprd12.prod.outlook.com>",
+   "fecha_correo": "2026-11-12T15:55:01Z",
+   "de": "Sebastian Toro Grajales → Juzgado 74 Pequeñas Causas de Bogotá",
+   "asunto_correo": "Acatamiento medida cautelar de embargo - Proceso No. 11001418907420260135600",
+   "resumen": "Auto del 24/09/2026, proceso ejecutivo de COBRANDO S.A.S. contra un trabajador. El 12/11 se confirmó con Nómina y se remitió el acatamiento al juzgado.",
+   "enlace": "https://outlook.office365.com/owa/?ItemID=AAMkADRmODQxOGQzLTVmY2UtNDU5ZC05YjU1LTI5NDNjNmQ0N2ZlOQBGAAAAAABGnBwQGXZsSosylKjYsitmBwBMMzN3lbEpQZnOZ7oTCU7zAAAAAAEJAABMMzN3lbEpQZnOZ7oTCU7zAACwWdw0AAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
+   "accion": "NUEVO",
+   "confianza": "BAJA",
+   "motivo": "Embargo atendido el 12/11. Puede ser el mismo No. 505 (embargo registrado el 11/11): verifique antes de aprobar.",
+   "campos": {
+    "B": "EMBARGOS",
+    "C": "Juzgado 74 de Pequeñas Causas y Competencia Múltiple de Bogotá",
+    "E": "Acatamiento de medida cautelar de embargo – proceso ejecutivo No. 11001418907420260135600 (COBRANDO S.A.S.).",
+    "F": "GENERAL",
+    "G": "12/11/2026",
+    "K": "12/11/2026",
+    "M": "Juzgado 74 de Pequeñas Causas y Competencia Múltiple de Bogotá",
+    "Q": "12/11/2026 Nómina confirma la aplicación y se remite acatamiento al juzgado."
+   }
+  },
+  {
+   "id": "<SJ0PR12MB6784D2BFC431459504A5AFEFD87F2@SJ0PR12MB6784.namprd12.prod.outlook.com>",
+   "fecha_correo": "2026-11-13T20:58:39Z",
+   "de": "Oficina de Apoyo Juzgados Civiles Mpales. de Ejecución – Medellín",
+   "asunto_correo": "RE: Solicitud de información para consignación de embargo – Proceso No. 05001400302220260034200",
+   "resumen": "La oficina informa la cuenta de depósitos judiciales para consignar los valores retenidos. Sebastián lo reenvió a Nómina y Tesorería el 13/11.",
+   "enlace": "https://outlook.office365.com/owa/?ItemID=AAMkADRmODQxOGQzLTVmY2UtNDU5ZC05YjU1LTI5NDNjNmQ0N2ZlOQBGAAAAAABGnBwQGXZsSosylKjYsitmBwBMMzN3lbEpQZnOZ7oTCU7zAAAAAAEMAABMMzN3lbEpQZnOZ7oTCU7zAACwpC2TAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
+   "accion": "NUEVO",
+   "confianza": "BAJA",
+   "motivo": "Puede ser seguimiento de un embargo ya registrado; apruebe solo si no existe en la matriz.",
+   "campos": {
+    "B": "EMBARGOS",
+    "C": "Oficina de Ejecución Civil Municipal de Medellín",
+    "E": "Solicitud de información para consignar valores retenidos por embargo – proceso No. 05001400302220260034200.",
+    "F": "GENERAL",
+    "G": "13/11/2026",
+    "K": "13/11/2026",
+    "M": "Nómina y Tesorería",
+    "Q": "13/11/2026 La oficina informa cuenta de depósitos judiciales; se remite a Nómina y Tesorería."
+   }
+  },
+  {
+   "id": "<PH7PR12MB6763F309DD8CF18DE37369ABD8702@PH7PR12MB6763.namprd12.prod.outlook.com>",
+   "fecha_correo": "2026-11-12T14:50:15Z",
+   "de": "Harold Alberto Moscoso Valencia / Celsia",
+   "asunto_correo": "PAGO 20527890 // CELSIA // SOLICITUD DE LEGALIZACIÓN OTROSÍ No. 2 CONTRATO No. 021-2025",
+   "resumen": "Legalización del otrosí No. 2 del contrato 021-2025 con Celsia: documentación de pólizas (todo riesgo y RC) organizada en carpeta compartida; Sebastián remitió a Celsia el 12/11.",
+   "enlace": "https://outlook.office365.com/owa/?ItemID=AAMkADRmODQxOGQzLTVmY2UtNDU5ZC05YjU1LTI5NDNjNmQ0N2ZlOQBGAAAAAABGnBwQGXZsSosylKjYsitmBwBMMzN3lbEpQZnOZ7oTCU7zAAAAAAEJAABMMzN3lbEpQZnOZ7oTCU7zAACwWdwvAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
+   "accion": "NUEVO",
+   "confianza": "MEDIA",
+   "motivo": "Gestión contractual con cliente (pólizas del otrosí) que no aparece en la matriz.",
+   "campos": {
+    "B": "GESTION JURIDICA",
+    "C": "Harold Alberto Moscoso Valencia",
+    "E": "Legalización del otrosí No. 2 del contrato No. 021-2025 con CELSIA COLOMBIA S.A.: remisión de pólizas (todo riesgo y responsabilidad civil).",
+    "F": "GENERAL",
+    "G": "12/11/2026",
+    "K": "12/11/2026",
+    "M": "CELSIA COLOMBIA S.A.",
+    "Q": "12/11/2026 Documentación de pólizas organizada por Logística y remitida a Celsia."
+   }
+  },
+  {
+   "id": "<CH2PR12MB48596921D816A465785A8C02AC7F2@CH2PR12MB4859.namprd12.prod.outlook.com>",
+   "fecha_correo": "2026-11-13T14:30:56Z",
+   "de": "Milena Gomez <mgomez@hesegoingenieria.com>",
+   "asunto_correo": "SOLICITUD DE AMPLIACIÓN DE INVESTIGACIÓN – NOVEDAD VEHÍCULO PLACA KYZ 667",
+   "resumen": "GH pide a Transporte ampliar la investigación del daño en la farola del vehículo KYZ 667 antes de definir descargos y si el colaborador asume costos. Sebastián está en copia.",
+   "enlace": "https://outlook.office365.com/owa/?ItemID=AAMkADRmODQxOGQzLTVmY2UtNDU5ZC05YjU1LTI5NDNjNmQ0N2ZlOQBGAAAAAABGnBwQGXZsSosylKjYsitmBwBMMzN3lbEpQZnOZ7oTCU7zAAAAAAEMAABMMzN3lbEpQZnOZ7oTCU7zAACwpC19AAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
+   "accion": "NUEVO",
+   "confianza": "BAJA",
+   "motivo": "Sebastián solo está en copia; entraría cuando GH remita el caso para descargos.",
+   "campos": {
+    "B": "PROCESOS DISCIPLINARIOS",
+    "C": "Jhon Fredy León",
+    "E": "Novedad vehículo placa KYZ 667 (daño farola delantera derecha): definir si procede descargos y asunción de costos, previa ampliación de la investigación de Transporte.",
+    "F": "ZARZAL",
+    "G": "13/11/2026",
+    "M": "Milena Gomez",
+    "Q": "13/11/2026 GH solicita a Transporte ampliar la investigación (Jurídica en copia)."
+   }
+  }
+ ]
+}
