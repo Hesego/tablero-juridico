@@ -1,0 +1,1285 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tablero Jurídico Hesego</title>
+<meta name="description" content="Indicadores en cascada del proceso Jurídico de HESEGO INGENIERÍA S.A.S. calculados a partir de la FO-GH-47, la FO-IG-136 y el registro mensual.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230B1D2F'/%3E%3Cpath d='M9 22V10m7 12V14m7 8V7' stroke='%23fff' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.5.0/echarts.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" defer></script>
+<script src="motor.js"></script>
+<style>
+/* ---------------------------------------------------------------- identidad */
+:root {
+  --azul: #0B1D2F; --azul-claro: #DDEBF7; --amarillo: #FFF2CC;
+  --verde: #2E9E5B; --ambar: #F2B134; --rojo: #D64545; --gris: #8A97A5;
+  --tinta: #0B1D2F; --tinta-2: #44566A; --tinta-3: #6B7B8C;
+  --linea: #D5DEE8; --pista: #E4EBF2; --fondo: #EEF2F6; --blanco: #fff;
+  --serie-2: #2a78d6;
+  --radio: 10px;
+  --fuente: 'Inter', 'Segoe UI', system-ui, sans-serif;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { font-family: var(--fuente); color: var(--tinta); background: var(--fondo); font-variant-numeric: tabular-nums; -webkit-font-smoothing: antialiased; }
+button, select, input, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+[hidden] { display: none !important; }
+
+/* ---------------------------------------------------------------- barra superior */
+.barra { position: sticky; top: 0; z-index: 30; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  padding: 10px 16px; background: var(--azul); color: #fff; }
+.marca { display: flex; flex-direction: column; line-height: 1.15; margin-right: auto; min-width: 180px; }
+.marca b { font-size: 15px; letter-spacing: .02em; }
+.marca span { font-size: 12px; opacity: .75; }
+.controles { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.controles select, .btn { height: 34px; border-radius: 8px; border: 1px solid rgba(255,255,255,.25); background: rgba(255,255,255,.08); color: #fff; padding: 0 10px; }
+.controles select option { color: var(--tinta); }
+.btn:hover { background: rgba(255,255,255,.18); }
+.btn.primario { background: #fff; color: var(--azul); border-color: #fff; font-weight: 600; }
+.btn.primario:hover { background: var(--azul-claro); }
+.interruptor { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; padding: 0 6px; }
+.vivo { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; letter-spacing: .06em; padding: 4px 10px; border-radius: 99px; background: rgba(255,255,255,.1); }
+.vivo i { width: 9px; height: 9px; border-radius: 50%; background: var(--gris); display: inline-block; }
+.vivo.activo i { background: #3BD27A; box-shadow: 0 0 0 0 rgba(59,210,122,.7); }
+.vivo.pulso i { animation: pulso 1.2s ease-out 3; }
+@keyframes pulso { 0% { box-shadow: 0 0 0 0 rgba(59,210,122,.8); } 100% { box-shadow: 0 0 0 12px rgba(59,210,122,0); } }
+
+/* ---------------------------------------------------------------- carga */
+.carga { max-width: 980px; margin: 32px auto; padding: 0 16px; }
+.carga h1 { font-size: 26px; margin: 0 0 6px; }
+.carga p.sub { color: var(--tinta-2); margin: 0 0 20px; }
+.zona { border: 2px dashed #9FB4CA; border-radius: 14px; background: #fff; padding: 36px 20px; text-align: center; transition: .2s; }
+.zona.encima { border-color: var(--azul); background: var(--azul-claro); }
+.zona h2 { margin: 0 0 6px; font-size: 19px; }
+.zona p { margin: 0 0 16px; color: var(--tinta-2); }
+.zona .acciones { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+.zona .btn { background: var(--azul); color: #fff; border: 0; height: 40px; padding: 0 18px; font-weight: 600; }
+.zona .btn.sec { background: #fff; color: var(--azul); border: 1px solid var(--azul); }
+.fuentes { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; margin-top: 18px; }
+.fuente { background: #fff; border-radius: 12px; padding: 14px 16px; border: 1px solid var(--linea); }
+.fuente b { display: block; font-size: 14px; }
+.fuente small { color: var(--tinta-3); display: block; margin-top: 4px; line-height: 1.4; }
+.fuente .est { margin-top: 8px; font-size: 13px; font-weight: 600; }
+.fuente .est.ok { color: var(--verde); } .fuente .est.no { color: var(--rojo); } .fuente .est.opc { color: var(--tinta-3); }
+.privado { font-size: 13px; color: var(--tinta-2); margin-top: 14px; }
+
+/* ---------------------------------------------------------------- escenario */
+.app { padding: 16px; }
+.escenario { max-width: 1400px; margin: 0 auto; }
+.aviso { max-width: 1400px; margin: 0 auto 10px; background: var(--amarillo); border: 1px solid #E8D48F; border-radius: 8px; padding: 8px 12px; font-size: 13px; }
+.slide { display: none; position: relative; aspect-ratio: 16 / 9; width: 100%; container-type: inline-size; overflow: hidden;
+  background: #fff url('assets/fondo_hesego.jpg') center / cover no-repeat; border-radius: 6px; box-shadow: 0 6px 24px rgba(11,29,47,.15);
+  -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+.slide.activa { display: block; }
+.slide::before { content: ''; position: absolute; inset: 0; background: rgba(255,255,255,.45); pointer-events: none; }
+.lienzo { position: absolute; inset: 0; z-index: 1; font-size: 1.25cqw; padding: 2em 3em 6.6em; display: flex; flex-direction: column; gap: .8em; }
+.pie { position: absolute; z-index: 1; left: 0; right: 0; bottom: 2.1cqw; text-align: center; font-size: .85cqw; color: var(--tinta-3); }
+.encab { display: flex; align-items: flex-start; justify-content: space-between; gap: 1em; }
+.encab h2 { margin: 0; font-size: 1.05em; text-transform: uppercase; letter-spacing: .08em; color: var(--tinta-2); font-weight: 600; }
+.encab .periodo { font-size: .8em; color: var(--tinta-3); white-space: nowrap; }
+.clave { font-size: 1.75em; font-weight: 700; line-height: 1.2; margin: .15em 0 0; padding-left: .55em; border-left: .22em solid var(--gris); }
+.clave.cumple { border-color: var(--verde); } .clave.alerta { border-color: var(--ambar); } .clave.nocumple { border-color: var(--rojo); }
+.cuerpo { flex: 1; min-height: 0; display: grid; gap: .9em; }
+.tarjeta { background: rgba(255,255,255,.92); border: 1px solid var(--linea); border-radius: .6em; padding: .8em 1em; min-width: 0; min-height: 0; display: flex; flex-direction: column; }
+.tarjeta.azul { background: rgba(221,235,247,.92); }
+.tarjeta.manual { background: rgba(255,242,204,.95); }
+.tarjeta h3 { margin: 0 0 .3em; font-size: .82em; font-weight: 600; color: var(--tinta-2); line-height: 1.25; }
+.g { width: 100%; height: 100%; min-height: 0; }
+.mini-btn { align-self: flex-start; margin-top: .4em; font-size: .7em; border: 1px solid var(--linea); background: #fff; border-radius: 6px; padding: .2em .7em; color: var(--tinta-2); }
+.mini-btn:hover { border-color: var(--azul); }
+.narrativa { background: rgba(255,255,255,.94); border: 1px solid var(--linea); border-left: .25em solid var(--azul); border-radius: .5em; padding: .55em 7em .55em .9em; font-size: .86em; line-height: 1.45; position: relative; }
+.narrativa p { margin: 0; } .narrativa p + p { margin-top: .25em; }
+.narrativa .ajustado { display: inline-block; font-size: .78em; font-weight: 600; color: #7A5B00; background: var(--amarillo); border-radius: 99px; padding: .05em .6em; margin-bottom: .25em; }
+.narrativa .comentario { margin-top: .35em; padding-top: .35em; border-top: 1px dashed var(--linea); color: #5C4A12; }
+.narrativa .editar { position: absolute; top: .4em; right: .5em; font-size: .75em; border: 1px solid var(--linea); background: #fff; border-radius: 6px; padding: .15em .6em; color: var(--tinta-2); }
+
+/* donas */
+.dona { position: relative; width: 100%; height: 100%; min-height: 0; }
+.dona .g { position: absolute; inset: 0; }
+.dona-t { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; pointer-events: none; text-align: center; }
+.dona-t b { font-size: 2.6em; font-weight: 800; letter-spacing: -.02em; line-height: 1; }
+.dona-t span { font-size: .75em; color: var(--tinta-3); margin-top: .2em; }
+.dona.chica .dona-t b { font-size: .9em; white-space: nowrap; }
+.dona.chica .dona-t span { font-size: .6em; }
+
+/* estado */
+.estado { display: inline-flex; align-items: center; gap: .35em; font-size: .78em; font-weight: 700; padding: .15em .65em; border-radius: 99px; white-space: nowrap; }
+.estado.cumple { background: #DDF2E5; color: #1D6B3D; } .estado.alerta { background: #FCEBC4; color: #7A5300; }
+.estado.nocumple { background: #F8DADA; color: #9B2323; } .estado.sin, .estado.seguimiento { background: #E7ECF1; color: #44566A; }
+.metricas { display: grid; grid-template-columns: repeat(3, 1fr); gap: .4em; text-align: center; }
+.metricas div { background: rgba(255,255,255,.75); border-radius: .4em; padding: .3em; }
+.metricas small { display: block; font-size: .62em; letter-spacing: .08em; color: var(--tinta-3); font-weight: 600; }
+.metricas b { font-size: 1.05em; }
+.var { font-size: .78em; font-weight: 600; }
+.var.mejor { color: #1D7A45; } .var.peor { color: #B02E2E; } .var.igual { color: var(--tinta-3); }
+
+/* tarjetas tácticas / operativas */
+.tact { cursor: pointer; text-align: left; border: 1px solid var(--linea); }
+.tact:hover, .op:hover { border-color: var(--azul); }
+.tact .fila { display: flex; gap: .6em; align-items: center; flex: 1; min-height: 0; }
+.tact .dona { width: 42%; aspect-ratio: 1; height: auto; flex: none; }
+.tact .datos { font-size: .78em; color: var(--tinta-2); line-height: 1.5; }
+.op { cursor: pointer; text-align: left; }
+.op .valor { display: flex; align-items: baseline; gap: .5em; flex-wrap: wrap; }
+.op .valor b { font-size: 1.75em; font-weight: 800; letter-spacing: -.02em; }
+.op .meta { font-size: .72em; color: var(--tinta-3); }
+.op .mini { flex: 1; min-height: 3.6em; }
+.op .pieop { display: flex; justify-content: space-between; align-items: center; gap: .4em; font-size: .72em; color: var(--tinta-3); }
+.op .nota { font-size: .7em; color: var(--tinta-2); line-height: 1.35; }
+
+/* KPIs */
+.kpi { display: flex; flex-direction: column; justify-content: center; }
+.kpi small { font-size: .66em; letter-spacing: .08em; color: var(--tinta-3); font-weight: 700; text-transform: uppercase; }
+.kpi b { font-size: 1.7em; font-weight: 800; letter-spacing: -.02em; }
+.kpi span { font-size: .72em; color: var(--tinta-2); }
+
+/* tablas y listas */
+.tabla { width: 100%; border-collapse: collapse; font-size: .7em; }
+.tabla th { text-align: left; font-weight: 600; color: var(--tinta-3); border-bottom: 1px solid var(--linea); padding: .3em .4em; position: sticky; top: 0; background: #fff; }
+.tabla td { padding: .3em .4em; border-bottom: 1px solid #EDF1F5; vertical-align: top; }
+.tabla td.n { text-align: right; white-space: nowrap; }
+.desliza { overflow: auto; min-height: 0; flex: 1; }
+.lista { list-style: none; margin: 0; padding: 0; font-size: .74em; overflow: auto; flex: 1; min-height: 0; }
+.lista li { padding: .35em 0; border-bottom: 1px solid #EDF1F5; line-height: 1.3; }
+.lista li small { color: var(--tinta-3); display: block; }
+.cifra { font-size: 2.2em; font-weight: 800; line-height: 1; }
+.matriz { display: grid; grid-template-columns: auto repeat(3, 1fr); gap: .25em; font-size: .72em; flex: 1; min-height: 0; }
+.matriz .h { font-weight: 600; color: var(--tinta-3); display: flex; align-items: center; justify-content: center; text-align: center; font-size: .9em; }
+.matriz button { border: 1px solid transparent; border-radius: .4em; font-size: 1.6em; font-weight: 800; color: var(--tinta); min-height: 2em; }
+.matriz button:hover { border-color: var(--azul); }
+.z1 { background: #DDF2E5; } .z2 { background: #FCEBC4; } .z3 { background: #F8DADA; }
+.vacio { color: var(--tinta-3); font-size: .78em; padding: .5em 0; }
+.alertas li { padding-left: 1.3em; position: relative; }
+.alertas li::before { content: '!'; position: absolute; left: 0; top: .35em; width: 1em; height: 1em; border-radius: 50%; background: var(--rojo); color: #fff; font-size: .75em; font-weight: 800; display: flex; align-items: center; justify-content: center; }
+.alertas li.riesgo::before { background: var(--ambar); color: var(--azul); }
+.alertas li.decision::before { content: '→'; background: var(--azul); }
+
+/* portada */
+.portada .lienzo { justify-content: center; padding-left: 7em; }
+.portada .empresa { font-size: .95em; letter-spacing: .2em; color: var(--tinta-2); font-weight: 600; }
+.portada h1 { font-size: 3.4em; margin: .2em 0 .1em; line-height: 1.05; }
+.portada .per { font-size: 1.7em; color: var(--tinta-2); font-weight: 500; }
+.portada .act { margin-top: 1.6em; font-size: .9em; color: var(--tinta-2); display: flex; align-items: center; gap: .8em; flex-wrap: wrap; }
+.portada .vivo { background: var(--azul); color: #fff; font-size: .8em; }
+
+/* miniaturas */
+.miniaturas { max-width: 1400px; margin: 12px auto 0; display: flex; gap: 8px; overflow-x: auto; padding-bottom: 6px; }
+.miniaturas button { flex: none; width: 150px; text-align: left; border: 1px solid var(--linea); background: #fff; border-radius: 8px; padding: 7px 9px; font-size: 12px; line-height: 1.25; }
+.miniaturas button.activa { border-color: var(--azul); box-shadow: inset 0 -3px 0 var(--azul); }
+.miniaturas button i { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 5px; background: var(--gris); }
+.miniaturas button span { color: var(--tinta-3); }
+.ayuda { max-width: 1400px; margin: 8px auto 0; font-size: 12px; color: var(--tinta-3); }
+
+/* panel lateral */
+.panel { position: fixed; top: 0; right: 0; bottom: 0; width: min(720px, 100vw); background: #fff; z-index: 60; box-shadow: -10px 0 30px rgba(11,29,47,.2);
+  transform: translateX(105%); transition: transform .25s ease; display: flex; flex-direction: column; }
+.panel.abierto { transform: none; }
+.panel header { padding: 14px 18px; border-bottom: 1px solid var(--linea); display: flex; gap: 12px; align-items: flex-start; }
+.panel header h3 { margin: 0; font-size: 16px; flex: 1; }
+.panel header p { margin: 4px 0 0; font-size: 13px; color: var(--tinta-2); font-weight: 400; }
+.panel .x { border: 0; background: var(--fondo); border-radius: 8px; width: 34px; height: 34px; font-size: 18px; }
+.panel .contenido { overflow: auto; padding: 8px 18px 20px; font-size: 13px; }
+.panel table { width: 100%; border-collapse: collapse; }
+.panel th { text-align: left; font-size: 12px; color: var(--tinta-3); border-bottom: 1px solid var(--linea); padding: 6px 4px; position: sticky; top: 0; background: #fff; }
+.panel td { border-bottom: 1px solid #EDF1F5; padding: 6px 4px; vertical-align: top; }
+.panel tr.mal td { background: #FDF1F1; }
+.velo { position: fixed; inset: 0; background: rgba(11,29,47,.35); z-index: 55; }
+
+dialog { border: 0; border-radius: 12px; padding: 0; width: min(720px, 94vw); box-shadow: 0 20px 60px rgba(0,0,0,.3); }
+dialog::backdrop { background: rgba(11,29,47,.45); }
+dialog .dlg { padding: 18px; display: flex; flex-direction: column; gap: 10px; }
+dialog h3 { margin: 0; }
+dialog textarea { width: 100%; min-height: 200px; border: 1px solid var(--linea); border-radius: 8px; padding: 10px; line-height: 1.5; }
+dialog .acc { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; }
+dialog .acc button { height: 36px; border-radius: 8px; border: 1px solid var(--linea); background: #fff; padding: 0 14px; }
+dialog .acc button.pri { background: var(--azul); color: #fff; border-color: var(--azul); }
+.toast { position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%); background: var(--azul); color: #fff; padding: 10px 16px; border-radius: 10px; font-size: 14px; z-index: 80; box-shadow: 0 8px 24px rgba(0,0,0,.25); max-width: 90vw; }
+
+/* ---------------------------------------------------------------- modo presentación */
+body.presentacion { background: #000; overflow: hidden; }
+body.presentacion .barra, body.presentacion .miniaturas, body.presentacion .ayuda, body.presentacion .aviso,
+body.presentacion .editar, body.presentacion .no-pres { display: none !important; }
+body.presentacion .app { padding: 0; height: 100vh; display: flex; align-items: center; justify-content: center; }
+body.presentacion .escenario { width: min(100vw, calc(100vh * 16 / 9)); max-width: none; }
+body.presentacion .slide { border-radius: 0; box-shadow: none; }
+
+/* ---------------------------------------------------------------- impresión (PDF, una página por diapositiva) */
+@page { size: 338.67mm 190.5mm; margin: 0; }
+@media print {
+  body { background: #fff; }
+  .barra, .miniaturas, .ayuda, .aviso, .panel, .velo, .editar, .toast, .carga, .no-pres { display: none !important; }
+  .app { padding: 0; }
+  .escenario { width: 1280px; max-width: none; }
+  .slide.solo-tablero { display: none !important; }
+  .slide:not(.solo-tablero) { display: block !important; width: 1280px; border-radius: 0; box-shadow: none; break-after: page; page-break-after: always; }
+}
+body.imprimiendo .escenario { width: 1280px; max-width: none; }
+body.imprimiendo .slide { display: block; }
+body.imprimiendo .slide.solo-tablero { display: none; }
+
+/* ---------------------------------------------------------------- celular */
+@media screen and (max-width: 820px) {
+  .barra { position: static; }
+  .marca { min-width: 0; }
+  .encab { flex-direction: column; gap: 4px; }
+  .tarjeta.azul > div:first-child { height: 220px; flex: none !important; }
+  .tact .dona { min-height: 0; }
+  .app { padding: 10px 0; }
+  .slide { aspect-ratio: auto; border-radius: 0; margin-bottom: 0; }
+  .slide.activa { display: block; }
+  .lienzo { position: relative; font-size: 14px; padding: 18px 16px 90px; }
+  .pie { font-size: 11px; bottom: 14px; }
+  .clave { font-size: 20px; }
+  .cuerpo { display: flex !important; flex-direction: column; }
+  .cuerpo > * { min-height: 220px; }
+  .cuerpo > .kpi, .cuerpo > .fila-kpi { min-height: 0; }
+  .fila-kpi { display: grid !important; grid-template-columns: 1fr 1fr; }
+  .portada .lienzo { padding-left: 16px; min-height: 70vh; }
+  .portada h1 { font-size: 34px; }
+  .rejilla-ops, .rejilla-tact { display: grid !important; grid-template-columns: 1fr !important; }
+  .rejilla-ops > *, .rejilla-tact > * { min-height: 200px; }
+  .miniaturas { padding: 0 16px 6px; }
+  .ayuda { padding: 0 16px; }
+}
+</style>
+</head>
+<body>
+
+<header class="barra">
+  <div class="marca"><b>HESEGO INGENIERÍA S.A.S.</b><span>Tablero vivo · Proceso Jurídico</span></div>
+  <div class="controles" id="controles" hidden>
+    <span class="vivo" id="vivo" title="Indica si el tablero vigila los archivos vinculados"><i></i><span>EN VIVO</span></span>
+    <select id="selAnio" aria-label="Año"></select>
+    <select id="selMes" aria-label="Mes"></select>
+    <label class="interruptor" title="Calcula el índice estratégico repartiendo el peso solo entre los tácticos con medición completa"><input type="checkbox" id="chkParcial"> Índice parcial</label>
+    <button class="btn" id="btnArchivos" title="Cargar o reemplazar archivos">Archivos</button>
+    <button class="btn" id="btnReanudar" hidden title="Volver a vigilar los archivos vinculados">Reanudar en vivo</button>
+    <button class="btn" id="btnTextos" title="Descargar los textos ajustados (narrativa_manual.json)">Textos</button>
+    <button class="btn" id="btnPNG" title="Descargar la diapositiva actual como imagen">PNG</button>
+    <button class="btn" id="btnPDF" title="Imprimir o guardar como PDF, una página por diapositiva">PDF</button>
+    <button class="btn primario" id="btnPresentar" title="Modo presentación (P)">Presentar</button>
+  </div>
+</header>
+
+<!-- ======================================================== Pantalla de carga -->
+<section class="carga" id="carga">
+  <h1>Indicadores del proceso Jurídico</h1>
+  <p class="sub">Cargue las matrices de Excel y el tablero calcula los indicadores en cascada para cualquier mes o año.</p>
+  <div class="zona" id="zona">
+    <h2>Arrastre aquí los archivos .xlsx</h2>
+    <p>Puede soltar los tres a la vez. El tablero reconoce cada uno por sus hojas.</p>
+    <div class="acciones">
+      <button class="btn" id="btnElegir">Elegir archivos</button>
+      <button class="btn sec" id="btnVincular" hidden title="Edge o Chrome: el tablero se actualiza solo cada vez que guarde el Excel">Vincular archivos (actualización en vivo)</button>
+      <button class="btn sec" id="btnVolver" hidden>Volver al tablero</button>
+    </div>
+    <input type="file" id="inpArchivos" accept=".xlsx,.xlsm,.json" multiple hidden>
+  </div>
+  <div class="fuentes" id="fuentes"></div>
+  <p class="privado">🔒 Los archivos se procesan solo en este navegador: no se envían a ningún servidor. Quedan guardados en este equipo para la próxima visita; puede <a href="#" id="lnkOlvidar">olvidarlos</a>.</p>
+</section>
+
+<!-- ======================================================== Tablero -->
+<main class="app" id="app" hidden>
+  <div class="aviso" id="aviso" hidden></div>
+  <div class="escenario" id="escenario"></div>
+  <nav class="miniaturas" id="miniaturas" aria-label="Diapositivas"></nav>
+  <p class="ayuda">← → navegar · F pantalla completa · P modo presentación · clic en un indicador para ver los casos</p>
+</main>
+
+<div class="velo" id="velo" hidden></div>
+<aside class="panel" id="panel" aria-hidden="true">
+  <header><h3 id="panelTitulo"></h3><button class="x" id="panelCerrar" aria-label="Cerrar">×</button></header>
+  <div class="contenido" id="panelContenido"></div>
+</aside>
+
+<dialog id="dlgTexto">
+  <form method="dialog" class="dlg">
+    <h3 id="dlgTitulo">Editar texto</h3>
+    <small>Un párrafo por línea. El texto queda marcado como «ajustado por el responsable» para este periodo.</small>
+    <textarea id="dlgArea"></textarea>
+    <div class="acc">
+      <button value="auto" id="dlgAuto">Volver al automático</button>
+      <button value="cancel">Cancelar</button>
+      <button value="ok" class="pri">Guardar</button>
+    </div>
+  </form>
+</dialog>
+
+<script>
+'use strict';
+/* =====================================================================
+   CONFIGURACIÓN EDITABLE – cambie aquí parámetros sin tocar el resto.
+   Los pesos, metas y sentidos NO van aquí: se leen de la FO-IG-136.
+   Los ANS se toman de la hoja «ANS» de la FO-GH-47 si existe.
+   ===================================================================== */
+const CONFIG = {
+  modoParcial: true,      // índice estratégico parcial cuando falta un táctico (se marca «parcial»)
+  umbralAlertaPP: 5,      // hasta 5 p.p. por debajo de la meta = en alerta
+  diasProximoVencer: 2,   // términos legales próximos a vencer (días hábiles)
+  intervaloVigilancia: 3000, // ms entre revisiones de los archivos vinculados
+  esperaGuardado: 1500    // ms de espera tras detectar un guardado (Excel escribe en varias pasadas)
+  // ans: { 'TUTELAS': 2, ... }  // opcional: reemplaza los ANS por defecto
+};
+
+const COLOR = { azul: '#0B1D2F', claro: '#DDEBF7', amarillo: '#FFF2CC', verde: '#2E9E5B', ambar: '#F2B134', rojo: '#D64545',
+  gris: '#8A97A5', pista: '#E4EBF2', serie2: '#2a78d6', suave: '#9DB7D3', tinta2: '#44566A', tinta3: '#6B7B8C', linea: '#D5DEE8' };
+const MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+const MESES_C = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+const TIPOS = {
+  gh47: { nombre: 'FO-GH-47 · Matriz de seguimiento jurídico', ayuda: 'Hoja «Proceso Jurídico». Obligatorio.', obligatorio: true },
+  ig136: { nombre: 'FO-IG-136 · Indicadores en cascada', ayuda: 'Hoja «Mapa en cascada»: pesos, metas y sentido. Obligatorio para la cascada.', obligatorio: true },
+  registro: { nombre: 'Registro mensual', ayuda: 'Hoja «REGISTRO»: operativos que no salen de la FO-GH-47. Opcional.', obligatorio: false }
+};
+
+// ---------------------------------------------------------------- estado
+const S = {
+  archivos: {},       // tipo → { nombre, modificado, buf, handle? }
+  modelo: null, anio: null, mes: null, idx: 0,
+  slides: [], graficos: [], narrativa: { version: 1, textos: {} },
+  ultimaCarga: null, vigilando: false, temporizador: null
+};
+
+// ---------------------------------------------------------------- formato colombiano
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+function fNum(x, dec = 0) {
+  if (x == null || !isFinite(x)) return '—';
+  const neg = x < 0; const s = Math.abs(x).toFixed(dec); const [e, d] = s.split('.');
+  return (neg ? '−' : '') + e.replace(/\B(?=(\d{3})+(?!\d))/g, '.') + (d ? ',' + d : '');
+}
+const fPct = (x, dec = 1) => x == null ? '—' : fNum(x * 100, dec) + ' %';
+const fPP = (x) => fNum(Math.abs(x * 100), 1) + ' p.p.';
+const fPesos = (x) => x == null ? '—' : '$ ' + fNum(Math.round(x));
+function fMill(x) {
+  if (x == null) return '—';
+  if (Math.abs(x) < 1e6) return fPesos(x);
+  const v = x / 1e6; return '$' + fNum(v, v >= 100 ? 0 : 1).replace(/,0$/, '') + ' millones';
+}
+const fDias = (x) => x == null ? '—' : fNum(x, 2).replace(/,00$/, '') + ' días';
+const fFecha = (d) => Motor.fmtFecha(d);
+const mesTxt = (m) => MESES[m - 1];
+const perTxt = (anio, mes) => mes ? `${mesTxt(mes)} de ${anio}` : `el acumulado de ${anio}`;
+const perCorto = (anio, mes) => mes ? `${MESES_C[mes - 1]} ${anio}` : `Acumulado ${anio}`;
+const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+const plural = (n, s, p) => `${fNum(n)} ${n === 1 ? s : (p || s + 's')}`;
+const ESTADO_TXT = { cumple: '✓ Cumple', alerta: '! En alerta', nocumple: '✕ No cumple', sin: '– Sin medición', seguimiento: 'Seguimiento' };
+const colorEstado = (e) => ({ cumple: COLOR.verde, alerta: COLOR.ambar, nocumple: COLOR.rojo }[e] || COLOR.gris);
+const pill = (e) => `<span class="estado ${e}">${ESTADO_TXT[e] || e}</span>`;
+// Nombres de clasificación con tildes para los textos (los datos se normalizan sin tildes).
+const NOMBRE_CLAS = { 'DERECHO DE PETICION': 'derecho de petición', 'GESTION JURIDICA': 'gestión jurídica', 'TUTELAS': 'tutelas', 'DEMANDAS': 'demandas',
+  'EMBARGOS': 'embargos', 'SINIESTROS': 'siniestros', 'RENUNCIA MOTIVADA': 'renuncia motivada', 'PROCESOS DISCIPLINARIOS': 'procesos disciplinarios',
+  'REVISION DOCUMENTAL Y CONCEPTO JURIDICO': 'revisión documental y concepto jurídico' };
+const clasTxt = (c) => NOMBRE_CLAS[c] || c.toLowerCase();
+
+function fValor(op, v) {
+  const u = op.def.calculo.unidad;
+  if (v == null) return '—';
+  return u === 'dias' ? fDias(v) : u === '$' ? fMill(v) : fPct(v);
+}
+function fMeta(op) {
+  const d = op.def; if (d.meta == null) return 'Sin meta';
+  const s = d.sentido === 'Menor' ? '≤' : d.sentido === 'Igual' ? '=' : '≥';
+  return `${s} ${d.calculo.unidad === 'dias' ? fDias(d.meta) : d.calculo.unidad === '$' ? fMill(d.meta) : fPct(d.meta, 0)}`;
+}
+/** ¿El cambio es una mejora según el sentido del indicador? */
+const esMejor = (delta, sentido) => sentido === 'Menor' ? delta < 0 : delta > 0;
+function fVar(op, prev) {
+  if (!prev || prev.valor == null || op.valor == null || prev.sinCasos || op.sinCasos) return '';
+  const d = op.valor - prev.valor;
+  if (Math.abs(d) < 1e-9) return `<span class="var igual">= sin cambio</span>`;
+  const u = op.def.calculo.unidad;
+  const txt = u === 'dias' ? fNum(Math.abs(d), 2) + ' días' : u === '$' ? fMill(Math.abs(d)) : fPP(d);
+  const cls = op.def.sentido ? (esMejor(d, op.def.sentido) ? 'mejor' : 'peor') : 'igual';
+  return `<span class="var ${cls}">${d > 0 ? '▲' : '▼'} ${txt}</span>`;
+}
+function fBrecha(valor, meta, unidad = '%') {
+  if (valor == null || meta == null) return '—';
+  if (unidad === 'dias') return (valor - meta > 0 ? '+' : '') + fNum(valor - meta, 2) + ' d';
+  const d = (valor - meta) * 100; return (d > 0 ? '+' : d < 0 ? '−' : '') + fNum(Math.abs(d), 1) + ' p.p.';
+}
+
+// ---------------------------------------------------------------- utilidades
+function toast(msg, ms = 3500) {
+  const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg; document.body.appendChild(t);
+  setTimeout(() => t.remove(), ms);
+}
+const guardarLocal = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* almacenamiento no disponible */ } };
+const leerLocal = (k) => { try { return JSON.parse(localStorage.getItem(k)); } catch (e) { return null; } };
+
+// IndexedDB: guarda los archivos (y sus vínculos) en este navegador para la próxima visita.
+const IDB = {
+  db: null,
+  abrir() {
+    if (this.db) return Promise.resolve(this.db);
+    return new Promise((ok, ko) => {
+      try {
+        const r = indexedDB.open('tablero-juridico-hesego', 1);
+        r.onupgradeneeded = () => r.result.createObjectStore('archivos');
+        r.onsuccess = () => { this.db = r.result; ok(this.db); };
+        r.onerror = () => ko(r.error);
+      } catch (e) { ko(e); }
+    });
+  },
+  async op(modo, fn) {
+    const db = await this.abrir();
+    return new Promise((ok, ko) => { const tx = db.transaction('archivos', modo); const st = tx.objectStore('archivos'); const r = fn(st); tx.oncomplete = () => ok(r && r.result); tx.onerror = () => ko(tx.error); });
+  },
+  guardar(k, v) { return this.op('readwrite', (st) => st.put(v, k)).catch(() => {}); },
+  async todos() {
+    try {
+      const db = await this.abrir();
+      return await new Promise((ok) => {
+        const out = {}; const tx = db.transaction('archivos', 'readonly'); const r = tx.objectStore('archivos').openCursor();
+        r.onsuccess = () => { const c = r.result; if (c) { out[c.key] = c.value; c.continue(); } else ok(out); };
+        r.onerror = () => ok({});
+      });
+    } catch (e) { return {}; }
+  },
+  limpiar() { return this.op('readwrite', (st) => st.clear()).catch(() => {}); }
+};
+
+// ---------------------------------------------------------------- lectura de archivos
+/** Identifica el archivo por sus hojas y guarda sus bytes. */
+function clasificar(nombre, buf) {
+  const wb = XLSX.read(buf, { type: 'array', bookSheets: true });
+  const hojas = wb.SheetNames.map(Motor.norm);
+  if (hojas.includes('PROCESO JURIDICO')) return 'gh47';
+  if (hojas.includes('MAPA EN CASCADA')) return 'ig136';
+  if (hojas.includes('REGISTRO')) return 'registro';
+  return null;
+}
+function hoja(buf, nombreNorm, opcional) {
+  const nombres = XLSX.read(buf, { type: 'array', bookSheets: true }).SheetNames;
+  const real = nombres.find((n) => Motor.norm(n) === nombreNorm);
+  if (!real) return null;
+  const wb = XLSX.read(buf, { type: 'array', sheets: [real], cellDates: false });
+  return XLSX.utils.sheet_to_json(wb.Sheets[real], { header: 1, raw: true, defval: null, blankrows: true });
+}
+
+async function incorporar(nombre, buf, modificado, handle) {
+  if (/\.json$/i.test(nombre)) {
+    try {
+      const j = JSON.parse(new TextDecoder().decode(buf));
+      if (j && j.textos) { S.narrativa = { version: 1, textos: { ...S.narrativa.textos, ...j.textos } }; guardarLocal('tj-narrativa', S.narrativa); return 'narrativa'; }
+    } catch (e) { /* no es JSON válido */ }
+    toast(`«${nombre}» no es un archivo de textos válido.`); return null;
+  }
+  if (/^~\$/.test(nombre)) return null; // temporales de Excel
+  let tipo;
+  try { tipo = clasificar(nombre, buf); } catch (e) { toast(`No se pudo leer «${nombre}»: ${e.message}`); return null; }
+  if (!tipo) { toast(`«${nombre}» no tiene las hojas esperadas (Proceso Jurídico, Mapa en cascada o REGISTRO).`, 5000); return null; }
+  const previo = S.archivos[tipo];
+  // FO-IG-136: si en la misma carga llegan varias versiones, se toma la más reciente (fecha del nombre o del archivo).
+  const orden = (n, mod) => ((n.match(/\d{4}-\d{2}-\d{2}/) || [''])[0]) + String(mod || 0).padStart(15, '0');
+  if (tipo === 'ig136' && previo && previo.lote === S.lote && previo.nombre !== nombre && orden(previo.nombre, previo.modificado) > orden(nombre, modificado)) return tipo;
+  S.archivos[tipo] = { nombre, modificado, buf, handle: handle || null, lote: S.lote };
+  IDB.guardar(tipo, S.archivos[tipo]);
+  return tipo;
+}
+
+async function cargarListaArchivos(files, handles) {
+  const tipos = [];
+  S.lote = Date.now();
+  for (let i = 0; i < files.length; i++) {
+    const f = files[i];
+    const buf = new Uint8Array(await f.arrayBuffer());
+    const t = await incorporar(f.name, buf, f.lastModified, handles ? handles[i] : null);
+    if (t) tipos.push(t);
+  }
+  return tipos;
+}
+
+/** Reconstruye el modelo desde los bytes guardados y vuelve a dibujar. */
+function reconstruir() {
+  const a = S.archivos;
+  pintarFuentes();
+  if (!a.gh47) { mostrarCarga(); return; }
+  const t0 = performance.now();
+  try {
+    S.modelo = Motor.construir({
+      gh47: hoja(a.gh47.buf, 'PROCESO JURIDICO'), ans: hoja(a.gh47.buf, 'ANS'),
+      ig136: a.ig136 ? hoja(a.ig136.buf, 'MAPA EN CASCADA') : null,
+      registro: a.registro ? hoja(a.registro.buf, 'REGISTRO') : null
+    }, CONFIG);
+  } catch (e) { console.error(e); toast('Error al leer los archivos: ' + e.message, 6000); return; }
+  S.ultimaCarga = new Date();
+  console.info(`Modelo reconstruido en ${Math.round(performance.now() - t0)} ms · ${S.modelo.casos.length} casos`);
+  prepararPeriodos();
+  mostrarTablero();
+  dibujar();
+}
+
+// ---------------------------------------------------------------- vigilancia en vivo (File System Access API)
+const puedeVincular = 'showOpenFilePicker' in window;
+async function vincular() {
+  try {
+    const hs = await window.showOpenFilePicker({ multiple: true, types: [{ description: 'Matrices Excel', accept: { 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx', '.xlsm'], 'application/json': ['.json'] } }] });
+    const files = await Promise.all(hs.map((h) => h.getFile()));
+    const tipos = await cargarListaArchivos(files, hs);
+    if (tipos.length) { reconstruir(); iniciarVigilancia(); }
+  } catch (e) { if (e.name !== 'AbortError') toast('No se pudieron vincular los archivos: ' + e.message); }
+}
+function iniciarVigilancia() {
+  const conHandle = Object.values(S.archivos).filter((a) => a.handle);
+  S.vigilando = conHandle.length > 0;
+  marcarVivo();
+  clearInterval(S.temporizador);
+  if (!S.vigilando) return;
+  S.temporizador = setInterval(revisarCambios, CONFIG.intervaloVigilancia);
+}
+let revisando = false, esperaGuardado = null;
+async function revisarCambios() {
+  if (revisando) return; revisando = true;
+  try {
+    let cambio = false;
+    for (const [tipo, a] of Object.entries(S.archivos)) {
+      if (!a.handle) continue;
+      let f;
+      try { f = await a.handle.getFile(); } catch (e) { S.vigilando = false; marcarVivo(); clearInterval(S.temporizador); document.getElementById('btnReanudar').hidden = false; return; }
+      if (f.lastModified !== a.modificado) { cambio = true; }
+    }
+    if (cambio) {
+      // Excel guarda en varias pasadas: se espera antes de releer.
+      clearTimeout(esperaGuardado);
+      esperaGuardado = setTimeout(async () => {
+        for (const [tipo, a] of Object.entries(S.archivos)) {
+          if (!a.handle) continue;
+          try {
+            const f = await a.handle.getFile();
+            if (f.lastModified !== a.modificado) await incorporar(f.name, new Uint8Array(await f.arrayBuffer()), f.lastModified, a.handle);
+          } catch (e) { console.warn('Lectura fallida, se reintenta', e); }
+        }
+        reconstruir();
+        pulsoVivo();
+      }, CONFIG.esperaGuardado);
+    }
+  } finally { revisando = false; }
+}
+async function reanudar() {
+  try {
+    for (const a of Object.values(S.archivos)) if (a.handle && (await a.handle.requestPermission({ mode: 'read' })) !== 'granted') throw new Error('permiso denegado');
+    document.getElementById('btnReanudar').hidden = true;
+    await revisarCambios(); iniciarVigilancia(); toast('Vigilancia de archivos reanudada.');
+  } catch (e) { toast('No se pudo reanudar: ' + e.message); }
+}
+function marcarVivo() {
+  const v = document.getElementById('vivo');
+  v.classList.toggle('activo', S.vigilando);
+  v.title = S.vigilando ? 'El tablero se actualiza solo al guardar los archivos vinculados.' : 'Archivos cargados manualmente: use «Vincular archivos» (Edge/Chrome) para la actualización en vivo.';
+  v.querySelector('span').textContent = S.vigilando ? 'EN VIVO' : 'ESTÁTICO';
+  document.querySelectorAll('.portada .vivo').forEach((x) => { x.classList.toggle('activo', S.vigilando); x.querySelector('span').textContent = S.vigilando ? 'EN VIVO' : 'DATOS CARGADOS'; });
+}
+function pulsoVivo() {
+  document.querySelectorAll('.vivo').forEach((v) => { v.classList.remove('pulso'); void v.offsetWidth; v.classList.add('pulso'); });
+  toast('Datos actualizados desde los archivos vinculados.', 2500);
+}
+
+// ---------------------------------------------------------------- pantallas
+function pintarFuentes() {
+  document.getElementById('fuentes').innerHTML = Object.entries(TIPOS).map(([k, t]) => {
+    const a = S.archivos[k];
+    const est = a ? `<div class="est ok">✓ ${esc(a.nombre)}${a.modificado ? ' · ' + new Date(a.modificado).toLocaleString('es-CO', { dateStyle: 'short', timeStyle: 'short' }) : ''}${a.handle ? ' · vinculado' : ''}</div>`
+      : `<div class="est ${t.obligatorio ? 'no' : 'opc'}">${t.obligatorio ? '✕ Falta' : '○ Opcional, no cargado'}</div>`;
+    return `<div class="fuente"><b>${t.nombre}</b><small>${t.ayuda}</small>${est}</div>`;
+  }).join('');
+}
+function mostrarCarga() {
+  document.getElementById('carga').hidden = false;
+  document.getElementById('app').hidden = true;
+  document.getElementById('controles').hidden = !S.modelo;
+  document.getElementById('btnVolver').hidden = !S.modelo;
+  pintarFuentes();
+}
+function mostrarTablero() {
+  document.getElementById('carga').hidden = true;
+  document.getElementById('app').hidden = false;
+  document.getElementById('controles').hidden = false;
+  const falt = Object.entries(TIPOS).filter(([k, t]) => t.obligatorio && !S.archivos[k]).map(([, t]) => t.nombre);
+  const av = document.getElementById('aviso');
+  av.hidden = !falt.length;
+  av.innerHTML = falt.length ? `Falta cargar: <b>${falt.map(esc).join(', ')}</b>. Sin la FO-IG-136 no hay pesos ni metas, por lo que la cascada no se calcula.` : '';
+}
+
+function prepararPeriodos() {
+  const m = S.modelo; const hoy = Motor.partes(Motor.hoyDia());
+  const anios = m.anios.length ? m.anios : [hoy.y];
+  const selA = document.getElementById('selAnio'), selM = document.getElementById('selMes');
+  if (S.anio == null) {
+    // Por defecto: último mes cerrado.
+    const ref = hoy.m === 1 ? { y: hoy.y - 1, m: 12 } : { y: hoy.y, m: hoy.m - 1 };
+    S.anio = anios.includes(ref.y) ? ref.y : anios[anios.length - 1];
+    S.mes = S.anio === ref.y ? ref.m : 12;
+  }
+  selA.innerHTML = anios.map((a) => `<option value="${a}" ${a === S.anio ? 'selected' : ''}>${a}</option>`).join('');
+  selM.innerHTML = `<option value="0">Acumulado del año</option>` + MESES.map((n, i) => `<option value="${i + 1}" ${i + 1 === S.mes ? 'selected' : ''}>${cap(n)}</option>`).join('');
+  selM.value = String(S.mes);
+  document.getElementById('chkParcial').checked = !!m.config.modoParcial;
+}
+
+// =====================================================================
+// NARRATIVA AUTOMÁTICA – reglas y plantillas determinísticas.
+// Prioridad: 1) incumplimientos 2) faltantes 3) deterioros 4) riesgos 5) logros.
+// =====================================================================
+const PRIORIDAD = { incumple: 1, falta: 2, deterioro: 3, riesgo: 4, info: 5, logro: 6 };
+function ordenar(frases, max = 3) {
+  frases.forEach((f) => { f.t = f.t.replace(/\.\.$/, '.'); }); // «p.p.» al final no duplica el punto
+  return frases.filter(Boolean).sort((a, b) => PRIORIDAD[a.nivel] - PRIORIDAD[b.nivel]).slice(0, max);
+}
+
+/** Casos que explican el incumplimiento de un operativo, en una frase corta. */
+function causa(op) {
+  const malos = op.casos.filter((x) => !x.ok);
+  if (!malos.length) return '';
+  const t = op.def.calculo.tipo;
+  const grupos = {};
+  malos.forEach((x) => { (grupos[x.c.clas] = grupos[x.c.clas] || []).push(x.c); });
+  const partes = Object.entries(grupos).map(([cl, cs]) => {
+    const ids = cs.slice(0, 3).map((c) => 'No. ' + c.id).join(', ') + (cs.length > 3 ? '…' : '');
+    if (t === 'ans') return `${cs.length === 1 ? 'una solicitud' : fNum(cs.length) + ' solicitudes'} de ${clasTxt(cl)} que ${cs.length === 1 ? 'superó' : 'superaron'} el ANS de ${cs[0].ans} días hábiles (${ids})`;
+    if (t === 'terminos') return `${plural(cs.length, 'caso')} de ${clasTxt(cl)} respondido${cs.length === 1 ? '' : 's'} fuera del término legal (${ids})`;
+    if (t === 'cobertura') return `${plural(cs.length, 'proceso')} de ${clasTxt(cl)} sin valorar (${ids})`;
+    return '';
+  }).filter(Boolean);
+  return partes.join(' y ');
+}
+function tendencia(valores, sentido) {
+  const v = valores.filter((x) => x != null).slice(-3);
+  if (v.length < 3 || !sentido) return 'estable';
+  const d1 = v[1] - v[0], d2 = v[2] - v[1];
+  if (Math.abs(d1) < 1e-9 || Math.abs(d2) < 1e-9) return 'estable';
+  if (esMejor(d1, sentido) && esMejor(d2, sentido)) return 'mejora';
+  if (!esMejor(d1, sentido) && !esMejor(d2, sentido)) return 'deterioro';
+  return 'estable';
+}
+
+/** Contexto común de la narrativa: periodo actual, anterior y serie anual. */
+function contexto() {
+  const m = S.modelo;
+  const res = Motor.calcular(m, S.anio, S.mes);
+  const pa = Motor.anterior(S.anio, S.mes);
+  const hayPrev = m.anios.includes(pa.anio);
+  const prev = hayPrev ? Motor.calcular(m, pa.anio, pa.mes) : null;
+  const serie = Motor.serieAnual(m, S.anio);
+  const per = perTxt(S.anio, S.mes);
+  const perAnt = hayPrev ? (pa.mes ? mesTxt(pa.mes) : `el acumulado de ${pa.anio}`) : null;
+  return { m, res, prev, serie, per, perAnt, Per: cap(per) };
+}
+
+function narrarTactico(ctx, ti) {
+  const t = ctx.res.tacticos[ti], tp = ctx.prev?.tacticos[ti];
+  const frases = [];
+  const nombre = t.def.nombre.charAt(0).toLowerCase() + t.def.nombre.slice(1);
+  if (t.resultado == null) {
+    frases.push({ nivel: 'falta', t: `El táctico de ${nombre} no se calcula en ${ctx.per} porque ${t.problemas.join(' y ')}.` });
+  }
+  t.operativos.forEach((o, oi) => {
+    const p = tp?.operativos[oi];
+    if (o.estado === 'nocumple' || o.estado === 'alerta') {
+      frases.push({ nivel: 'incumple', t: `«${o.def.nombre}» se ubicó en ${fValor(o, o.valor)} frente a una meta de ${fMeta(o).replace(/^[≥≤=] /, '')}${o.denominador && o.def.calculo.unidad === '%' && o.def.calculo.tipo !== 'efectividad' ? ` (${fNum(o.numerador)} de ${fNum(o.denominador)})` : ''}${causa(o) ? ', explicado por ' + causa(o) : ''}.` });
+    }
+    if (p && p.valor != null && o.valor != null && !o.sinCasos && !p.sinCasos && o.def.sentido && o.def.calculo.unidad !== '$') {
+      const d = o.valor - p.valor;
+      const tend = tendencia(ctx.serie.map((s) => s.res.tacticos[ti]?.operativos[oi]?.valor), o.def.sentido);
+      const umbral = o.def.calculo.unidad === 'dias' ? 0.5 : 0.01;
+      if (!esMejor(d, o.def.sentido) && Math.abs(d) >= umbral)
+        frases.push({ nivel: 'deterioro', t: `«${o.def.nombre}» ${o.def.sentido === 'Menor' ? 'aumentó' : 'disminuyó'} ${o.def.calculo.unidad === 'dias' ? fNum(Math.abs(d), 2) + ' días' : fPP(d)} frente a ${ctx.perAnt}${tend === 'deterioro' ? ', con deterioro sostenido en los últimos tres meses' : ''}.` });
+    }
+    if (o.def.calculo.tipo === 'exposicion' && o.extra) {
+      const c = o.extra;
+      if (c.provision > 0) frases.push({ nivel: 'riesgo', t: `Se requiere provisionar ${fMill(c.provision)} y revelar en nota ${fMill(c.nota)} por procesos calificados como probables o posibles.` });
+    }
+  });
+  if (t.resultado != null && t.operativos.every((o) => !(o.def.peso > 0) || o.estado === 'cumple'))
+    frases.push({ nivel: 'logro', t: `Todos los operativos con peso cumplen la meta en ${ctx.per}; el táctico alcanza ${fPct(t.resultado)}.` });
+  else if (t.resultado != null && tp?.resultado != null && t.resultado > tp.resultado + 0.0005)
+    frases.push({ nivel: 'logro', t: `El táctico mejora ${fPP(t.resultado - tp.resultado)} frente a ${ctx.perAnt}.` });
+  let clave;
+  if (t.resultado == null) clave = `${t.def.nombre}: sin medición completa en ${ctx.per}`;
+  else if (t.estado === 'cumple') clave = `${t.def.nombre} cumple la meta con ${fPct(t.resultado)}`;
+  else clave = `${t.def.nombre}: ${fPct(t.resultado)}, ${fPP((t.def.meta || 1) - t.resultado)} por debajo de la meta`;
+  const comentarios = t.operativos.filter((o) => o.comentario).map((o) => `${o.def.nombre}: ${o.comentario}`);
+  return { clave, estado: t.estado, frases: ordenar(frases), todas: frases, comentarios };
+}
+
+function narrarResumen(ctx) {
+  const e = ctx.res.estrategico, ep = ctx.prev?.estrategico;
+  const frases = [];
+  const meta = e.def?.meta ?? 1;
+  if (e.resultado != null) {
+    // Causa principal: el operativo con mayor pérdida ponderada.
+    let peor = null, perdida = 0;
+    ctx.res.tacticos.forEach((t) => t.operativos.forEach((o) => {
+      if (o.cumpl == null || !(o.def.peso > 0) || t.resultado == null) return;
+      const p = (t.def.peso || 0) * o.def.peso * (1 - o.cumpl);
+      if (p > perdida + 1e-12) { perdida = p; peor = o; }
+    }));
+    const dif = e.resultado - meta;
+    const pos = Math.abs(dif) < 0.00005 ? 'en línea con la meta' : `${fPP(dif)} ${dif < 0 ? 'por debajo' : 'por encima'} de la meta`;
+    frases.push({ nivel: dif < -0.00005 ? 'incumple' : 'logro', t: `En ${ctx.per} el índice de gestión jurídica ${e.parcial ? '(parcial) ' : ''}alcanzó ${fPct(e.resultado)}, ${pos}${dif < -0.00005 && peor ? `, explicado principalmente por ${causa(peor) || `«${peor.def.nombre}»`}` : ''}.` });
+  } else frases.push({ nivel: 'falta', t: `El índice de gestión jurídica no se calcula en ${ctx.per}: ${e.sinDato.map((t) => `falta «${t.def.nombre}»`).join(', ') || 'los pesos tácticos no suman 100 %'}.` });
+  if (e.parcial) frases.push({ nivel: 'falta', t: `El índice es parcial: reparte el peso entre los tácticos con medición (${fPct(e.pesoMedido, 0)} del peso total); no incluye ${e.sinDato.map((t) => `«${t.def.nombre}»`).join(' ni ')}.` });
+  if (ep && ep.resultado != null && e.resultado != null && Math.abs(e.resultado - ep.resultado) >= 0.0005)
+    frases.push({ nivel: e.resultado < ep.resultado ? 'deterioro' : 'logro', t: `Frente a ${ctx.perAnt} el índice ${e.resultado < ep.resultado ? 'bajó' : 'subió'} ${fPP(e.resultado - ep.resultado)}.` });
+  let clave;
+  if (e.resultado == null) clave = 'El índice de gestión jurídica no tiene medición completa';
+  else if (e.estado === 'cumple') clave = `La gestión jurídica cumple la meta con ${fPct(e.resultado)}`;
+  else if (e.estado === 'alerta') clave = `La gestión jurídica está en alerta: ${fPct(e.resultado)} frente a una meta de ${fPct(meta, 0)}`;
+  else clave = `La gestión jurídica no cumple la meta: ${fPct(e.resultado)} frente a ${fPct(meta, 0)}`;
+  return { clave, estado: e.estado, frases: ordenar(frases), todas: frases };
+}
+
+function narrarContingencia(ctx) {
+  const c = ctx.res.contingencia, cp = ctx.prev?.contingencia;
+  const frases = [];
+  if (c.exposicion > 0) {
+    const top = c.procesos.slice().sort((a, b) => (b.pretendido || 0) - (a.pretendido || 0))[0];
+    const share = top ? (top.pretendido || 0) / c.exposicion : 0;
+    let t = `La exposición en procesos abiertos en contra asciende a ${fMill(c.exposicion)} en ${plural(c.procesos.length, 'proceso')}`;
+    if (top && share >= 0.5) t += `; el ${fPct(share)} corresponde a un solo proceso (${clasTxt(top.clas)} – ${top.nombre}) calificado como ${top.prob.toLowerCase()}${top.prob === 'REMOTO' ? ', por lo que no exige provisión' : ''}`;
+    frases.push({ nivel: 'info', t: t + '.' });
+  } else frases.push({ nivel: 'logro', t: `No hay procesos abiertos en contra con valor pretendido al corte del ${fFecha(ctx.res.rango.fin)}.` });
+  c.procesos.filter((p) => p.prob === 'PROBABLE').forEach((p) =>
+    frases.push({ nivel: 'riesgo', t: `Se requiere provisionar ${fMill(p.reserva)} por ${clasTxt(p.clas)} – ${p.nombre} (${p.sede.toLowerCase()}), cuya probabilidad se calificó como probable (${fPct(p.pct, 0)}).` }));
+  c.procesos.filter((p) => p.prob === 'POSIBLE').forEach((p) =>
+    frases.push({ nivel: 'riesgo', t: `Se debe revelar en nota ${fMill(p.reserva)} por ${clasTxt(p.clas)} – ${p.nombre}, calificado como posible (${fPct(p.pct, 0)}).` }));
+  if (cp) {
+    const antes = new Set(cp.procesos.map((p) => p.id));
+    const nuevos = c.procesos.filter((p) => !antes.has(p.id));
+    if (nuevos.length) frases.push({ nivel: 'riesgo', t: `${nuevos.length === 1 ? 'Ingresó un proceso nuevo' : `Ingresaron ${nuevos.length} procesos nuevos`} con contingencia por ${fMill(nuevos.reduce((a, p) => a + (p.pretendido || 0), 0))} frente a ${ctx.perAnt}.` });
+  }
+  if (c.porValorar.length) frases.push({ nivel: 'incumple', t: `${plural(c.porValorar.length, 'proceso abierto', 'procesos abiertos')} sin valoración del riesgo.` });
+  const clave = c.exposicion > 0 ? `Exposición de ${fMill(c.exposicion)}; provisión requerida ${fMill(c.provision)}` : 'Sin exposición económica en procesos abiertos';
+  return { clave, estado: c.provision > 0 ? 'alerta' : 'cumple', frases: ordenar(frases), todas: frases };
+}
+
+function narrarAtencion(ctx) {
+  const a = ctx.res.atencion; const frases = [];
+  if (a.vencidos.length) frases.push({ nivel: 'incumple', t: `${plural(a.vencidos.length, 'caso abierto', 'casos abiertos')} ${a.vencidos.length === 1 ? 'supera' : 'superan'} el ANS sin depender de otro proceso; el de mayor atraso (No. ${a.vencidos[0].c.id}, ${clasTxt(a.vencidos[0].c.clas)}) lleva ${plural(a.vencidos[0].dias, 'día hábil', 'días hábiles')} vencido.` });
+  const legales = a.terminos.filter((x) => x.restan < 0);
+  if (legales.length) frases.push({ nivel: 'incumple', t: `${plural(legales.length, 'término legal vencido', 'términos legales vencidos')} sin respuesta registrada.` });
+  const prox = a.terminos.filter((x) => x.restan >= 0);
+  if (prox.length) frases.push({ nivel: 'riesgo', t: `${plural(prox.length, 'término legal vence', 'términos legales vencen')} en ${CONFIG.diasProximoVencer} días hábiles o menos: ${prox.slice(0, 3).map((x) => `No. ${x.c.id} (${clasTxt(x.c.clas)}, ${fFecha(x.limite)})`).join(', ')}.` });
+  if (a.porValorar.length) frases.push({ nivel: 'incumple', t: `${plural(a.porValorar.length, 'caso', 'casos')} por valorar el riesgo jurídico.` });
+  if (a.enEspera.length) frases.push({ nivel: 'info', t: `${plural(a.enEspera.length, 'caso está', 'casos están')} pendiente${a.enEspera.length === 1 ? '' : 's'} de revisión por el proceso encargado.` });
+  if (!a.vencidos.length && !a.terminos.length && !a.porValorar.length) frases.push({ nivel: 'logro', t: `Al ${fFecha(a.ref)} no hay casos vencidos frente al ANS, ni términos legales próximos a vencer, ni casos por valorar.` });
+  const n = a.vencidos.length + a.terminos.length + a.porValorar.length;
+  const clave = n ? `${plural(a.vencidos.length, 'vencido')} · ${plural(a.porValorar.length, 'por valorar', 'por valorar')} · ${plural(a.terminos.length, 'término', 'términos')} por vencer` : 'Sin casos críticos al corte';
+  return { clave, estado: a.vencidos.length || legales.length ? 'nocumple' : n ? 'alerta' : 'cumple', frases: ordenar(frases), todas: frases };
+}
+
+function narrarVolumen(ctx) {
+  const v = ctx.res.volumen, vp = ctx.prev?.volumen; const frases = [];
+  let t = `En ${ctx.per} se recibieron ${plural(v.recibidos, 'caso')} y se cerraron ${fNum(v.cerrados)}`;
+  if (vp) { const d = v.recibidos - vp.recibidos; t += d ? ` (${d > 0 ? '+' : '−'}${fNum(Math.abs(d))} recibidos frente a ${ctx.perAnt})` : ' (igual volumen que el periodo anterior)'; }
+  frases.push({ nivel: 'info', t: t + '.' });
+  const top = Object.entries(v.porClasRec).sort((a, b) => b[1] - a[1])[0];
+  if (top) frases.push({ nivel: 'info', t: `La clasificación con mayor volumen fue ${clasTxt(top[0])}, con ${fNum(top[1])} casos (${fPct(top[1] / v.recibidos)} del total).` });
+  const sede = Object.entries(v.porSede).sort((a, b) => b[1] - a[1])[0];
+  if (sede) frases.push({ nivel: 'info', t: `La sede con más casos recibidos fue ${cap(sede[0].toLowerCase())} (${fNum(sede[1])}).` });
+  if (v.cerrados < v.recibidos) frases.push({ nivel: 'riesgo', t: `Ingresaron ${fNum(v.recibidos - v.cerrados)} casos más de los que se cerraron, lo que aumenta la carga pendiente.` });
+  return { clave: `${plural(v.recibidos, 'caso recibido', 'casos recibidos')} y ${plural(v.cerrados, 'cerrado')} en ${ctx.per}`, estado: 'sin', frases: ordenar(frases), todas: frases };
+}
+
+// ---------------------------------------------------------------- textos ajustados
+const claveTexto = (slideId) => `${S.anio}-${String(S.mes).padStart(2, '0')}|${slideId}`;
+function textoManual(slideId) { return S.narrativa.textos[claveTexto(slideId)] || null; }
+function htmlNarrativa(slideId, n) {
+  const man = textoManual(slideId);
+  const parr = man ? man.texto.split(/\n+/).filter(Boolean) : n.frases.map((f) => f.t);
+  return `<div class="narrativa">
+    ${man ? `<span class="ajustado">Texto ajustado por el responsable · ${esc(new Date(man.fecha).toLocaleDateString('es-CO'))}</span>` : ''}
+    ${parr.map((p) => `<p>${esc(p)}</p>`).join('') || '<p>—</p>'}
+    ${n.comentarios && n.comentarios.length ? `<div class="comentario"><b>Comentario del responsable:</b> ${n.comentarios.map(esc).join(' · ')}</div>` : ''}
+    <button class="editar" data-editar="${slideId}">Editar texto</button>
+  </div>`;
+}
+let editando = null;
+function abrirEdicion(slideId) {
+  const s = S.slides.find((x) => x.id === slideId); if (!s) return;
+  editando = slideId;
+  const man = textoManual(slideId);
+  document.getElementById('dlgTitulo').textContent = `Editar texto · ${s.titulo} · ${perCorto(S.anio, S.mes)}`;
+  document.getElementById('dlgArea').value = man ? man.texto : s.narrativa.frases.map((f) => f.t).join('\n');
+  document.getElementById('dlgAuto').hidden = !man;
+  document.getElementById('dlgTexto').showModal();
+}
+document.getElementById('dlgTexto').addEventListener('close', () => {
+  const v = document.getElementById('dlgTexto').returnValue;
+  if (!editando) return;
+  const k = claveTexto(editando);
+  if (v === 'ok') { const t = document.getElementById('dlgArea').value.trim(); if (t) S.narrativa.textos[k] = { texto: t, fecha: new Date().toISOString() }; }
+  if (v === 'auto') delete S.narrativa.textos[k];
+  if (v === 'ok' || v === 'auto') { guardarLocal('tj-narrativa', S.narrativa); dibujar(); if (v === 'ok') toast('Texto guardado en este navegador. Use «Textos» para descargar narrativa_manual.json.'); }
+  editando = null;
+});
+
+// =====================================================================
+// GRÁFICOS (ECharts)
+// =====================================================================
+let gid = 0, pendientes = [];
+/** Marca un contenedor de gráfico; se inicializa cuando la diapositiva se muestra. */
+function G(opcion, cls = '') { const id = 'g' + (++gid); pendientes.push({ id, opcion }); return `<div class="g ${cls}" id="${id}"></div>`; }
+function grafico(el, opcion) {
+  const ch = echarts.init(el, null, { renderer: 'canvas' });
+  ch.setOption(Object.assign({ textStyle: { fontFamily: 'Inter, Segoe UI, sans-serif', color: COLOR.tinta2 }, animationDuration: 900, animationEasing: 'cubicOut' }, opcion));
+  S.graficos.push(ch); return ch;
+}
+function htmlDona(frac, color, texto, sub, chica) {
+  const f = Math.max(0, Math.min(1, frac ?? 0));
+  return `<div class="dona ${chica ? 'chica' : ''}">${G({
+    series: [{ type: 'pie', radius: ['76%', '94%'], silent: true, label: { show: false }, startAngle: 90, animationType: 'expansion',
+      data: [{ value: f, itemStyle: { color: frac == null ? COLOR.pista : color } }, { value: 1 - f, itemStyle: { color: COLOR.pista } }] }]
+  })}<div class="dona-t"><b>${texto}</b>${sub ? `<span>${sub}</span>` : ''}</div></div>`;
+}
+const ejeCat = (data, extra = {}) => ({ type: 'category', data, axisTick: { show: false }, axisLine: { lineStyle: { color: '#C3CCD6' } }, axisLabel: { color: COLOR.tinta3, fontSize: 11 }, ...extra });
+const ejeVal = (extra = {}) => ({ type: 'value', splitLine: { lineStyle: { color: '#E6ECF2' } }, axisLabel: { color: COLOR.tinta3, fontSize: 11 }, ...extra });
+const tooltipBase = { backgroundColor: '#fff', borderColor: COLOR.linea, textStyle: { color: COLOR.azul, fontSize: 12 }, extraCssText: 'box-shadow:0 4px 14px rgba(11,29,47,.15);border-radius:8px;' };
+
+function optTendenciaOp(op, serie, ti, oi) {
+  const u = op.def.calculo.unidad;
+  const vals = serie.map((s) => s.res.tacticos[ti]?.operativos[oi]?.valor ?? null);
+  const fmt = (v) => v == null ? 'sin dato' : u === 'dias' ? fDias(v) : u === '$' ? fMill(v) : fPct(v);
+  return {
+    grid: { left: 2, right: 2, top: 6, bottom: 16 },
+    tooltip: { ...tooltipBase, trigger: 'axis', axisPointer: { type: 'shadow' }, formatter: (p) => `${cap(MESES[p[0].dataIndex])}: <b>${fmt(p[0].value)}</b>${op.def.meta != null ? `<br>Meta ${fMeta(op)}` : ''}` },
+    xAxis: ejeCat(serie.map((s) => MESES_C[s.mes - 1].charAt(0)), { axisLabel: { color: COLOR.tinta3, fontSize: 9 } }),
+    yAxis: { type: 'value', show: false, min: 0, max: u === '%' ? 1 : u === 'dias' && op.def.meta != null ? (v) => Math.max(v.max, op.def.meta) * 1.08 : null },
+    series: [{ type: 'bar', barMaxWidth: 12, data: vals.map((v, i) => ({ value: v, itemStyle: { color: serie[i].mes === S.mes ? COLOR.azul : COLOR.suave, borderRadius: [3, 3, 0, 0] } })),
+      markLine: op.def.meta != null && u !== '$' ? { symbol: 'none', silent: true, label: { show: false }, lineStyle: { color: COLOR.rojo, type: 'dashed', width: 1.5 }, data: [{ yAxis: op.def.meta }] } : undefined }]
+  };
+}
+
+// =====================================================================
+// DIAPOSITIVAS
+// =====================================================================
+function encabezado(titulo, n) {
+  return `<div class="encab"><h2>${esc(titulo)}</h2><span class="periodo">${esc(cap(perTxt(S.anio, S.mes)))} · corte ${fFecha(Motor.calcular(S.modelo, S.anio, S.mes).rango.fin)}</span></div>
+    <p class="clave ${n.estado}">${esc(n.clave)}</p>`;
+}
+
+function slidePortada(ctx) {
+  const ultima = Math.max(...Object.values(S.archivos).map((a) => a.modificado || 0));
+  return {
+    id: 'portada', titulo: 'Portada', estado: 'sin', cls: 'portada',
+    html: `<div class="empresa">HESEGO INGENIERÍA S.A.S.</div>
+      <h1>Informe de gestión<br>Proceso Jurídico</h1>
+      <div class="per">${esc(cap(perTxt(S.anio, S.mes)))}</div>
+      <div class="act">
+        <span class="vivo ${S.vigilando ? 'activo' : ''}"><i></i><span>${S.vigilando ? 'EN VIVO' : 'DATOS CARGADOS'}</span></span>
+        <span>Datos actualizados al ${ultima ? new Date(ultima).toLocaleString('es-CO', { dateStyle: 'long', timeStyle: 'short' }) : '—'}</span>
+      </div>
+      <div class="act" style="margin-top:.6em;font-size:.75em">Fuentes: ${Object.values(S.archivos).map((a) => esc(a.nombre)).join(' · ')}</div>`
+  };
+}
+
+function slideResumen(ctx) {
+  const n = narrarResumen(ctx); const e = ctx.res.estrategico, ep = ctx.prev?.estrategico;
+  const meta = e.def?.meta ?? 1;
+  const variacion = ep && ep.resultado != null && e.resultado != null
+    ? `<span class="var ${e.resultado >= ep.resultado ? 'mejor' : 'peor'}">${e.resultado >= ep.resultado ? '▲' : '▼'} ${fPP(e.resultado - ep.resultado)} vs ${esc(ctx.perAnt)}</span>` : '<span class="var igual">Sin periodo anterior</span>';
+  const tacts = ctx.res.tacticos.map((t, ti) => `
+    <button class="tarjeta tact" data-ir="tactico-${ti}">
+      <h3>${esc(t.def.nombre)}</h3>
+      <div class="fila">${htmlDona(t.resultado, colorEstado(t.estado), t.resultado == null ? '—' : fPct(t.resultado), '', true)}
+        <div class="datos">Peso <b>${fPct(t.def.peso, 0)}</b><br>${plural(t.operativos.length, 'operativo')}<br>${pill(t.estado)}</div></div>
+    </button>`).join('');
+  const serie = ctx.serie;
+  const opt = {
+    grid: { left: 44, right: 40, top: 14, bottom: 22 },
+    tooltip: { ...tooltipBase, trigger: 'axis', formatter: (p) => `${cap(MESES[serie[p[0].dataIndex].mes - 1])}: <b>${p[0].value == null ? 'sin medición' : fPct(p[0].value)}</b>${serie[p[0].dataIndex].res.estrategico.parcial ? ' (parcial)' : ''}<br>Meta ${fPct(meta, 0)}` },
+    xAxis: ejeCat(serie.map((s) => MESES_C[s.mes - 1])),
+    yAxis: ejeVal({ min: (v) => Math.max(0, Math.floor(Math.min(v.min, meta) * 20) / 20 - 0.05), max: (v) => Math.max(1, v.max), axisLabel: { color: COLOR.tinta3, fontSize: 11, formatter: (v) => fNum(v * 100, 0) + ' %' } }),
+    series: [{ type: 'line', name: 'Índice', data: serie.map((s) => s.res.estrategico.resultado), connectNulls: false, symbol: 'circle', symbolSize: 8, lineStyle: { width: 2, color: COLOR.azul },
+      itemStyle: { color: (p) => serie[p.dataIndex].mes === S.mes ? COLOR.azul : '#fff', borderColor: COLOR.azul, borderWidth: 2 },
+      markLine: { symbol: 'none', silent: true, label: { formatter: 'Meta', color: COLOR.rojo, fontSize: 10 }, lineStyle: { color: COLOR.rojo, type: 'dashed' }, data: [{ yAxis: meta }] } }]
+  };
+  return {
+    id: 'resumen', titulo: 'Resumen estratégico', estado: e.estado, narrativa: n,
+    html: `${encabezado(e.def?.nombre || 'Índice de cumplimiento ponderado de la gestión jurídica', n)}
+      <div class="cuerpo" style="grid-template-columns: 30% 1fr; grid-template-rows: 1fr 1fr;">
+        <div class="tarjeta azul" style="grid-row: span 2; align-items:center; gap:.5em">
+          <div style="flex:1; width:100%; min-height:0">${htmlDona(e.resultado, colorEstado(e.estado), e.resultado == null ? '—' : fPct(e.resultado), e.parcial ? 'ÍNDICE PARCIAL' : 'ÍNDICE GLOBAL')}</div>
+          <div class="metricas" style="width:100%"><div><small>META</small><b>${fPct(meta, 0)}</b></div><div><small>BRECHA</small><b>${fBrecha(e.resultado, meta)}</b></div><div><small>ESTADO</small>${pill(e.estado)}</div></div>
+          <div>${variacion}</div>
+        </div>
+        <div class="rejilla-tact" style="display:grid; grid-template-columns: repeat(${Math.max(1, ctx.res.tacticos.length)}, 1fr); gap:.7em; min-height:0">${tacts || '<div class="tarjeta vacio">Cargue la FO-IG-136 para ver los tácticos.</div>'}</div>
+        <div class="tarjeta"><h3>Tendencia del índice en ${S.anio}</h3>${G(opt)}</div>
+      </div>
+      ${htmlNarrativa('resumen', n)}`
+  };
+}
+
+function slideTactico(ctx, ti) {
+  const t = ctx.res.tacticos[ti], tp = ctx.prev?.tacticos[ti];
+  const n = narrarTactico(ctx, ti);
+  const ops = t.operativos.map((o, oi) => {
+    const p = tp?.operativos[oi];
+    const manual = o.def.calculo.tipo === 'registro';
+    const detalle = o.sinCasos ? 'Sin casos en el periodo' : o.denominador != null && o.def.calculo.unidad === '%' ? `${fNum(o.numerador)} de ${fNum(o.denominador)}` : o.def.calculo.tipo === 'promedio' ? `${plural(o.denominador, 'caso')} cerrados` : '';
+    const efect = o.def.calculo.tipo === 'efectividad' || o.def.calculo.tipo === 'recuperacion';
+    return `<div class="tarjeta op ${manual ? 'manual' : ''}" data-casos="${ti}:${oi}" role="button" tabindex="0" title="Ver los casos que componen el indicador">
+      <h3>${esc(o.def.nombre)}</h3>
+      <div class="valor"><b>${fValor(o, o.valor)}</b>${pill(o.estado)}</div>
+      <div class="meta">Meta ${esc(fMeta(o))} · peso ${fPct(o.def.peso, 0)}${o.def.sentido ? ' · sentido ' + o.def.sentido.toLowerCase() : ''}</div>
+      <div class="mini">${G(optTendenciaOp(o, ctx.serie, ti, oi))}</div>
+      <div class="pieop"><span>${esc(detalle)}${efect ? ' · acumulado del año' : ''}${manual && o.origenRegistro ? ' · registro ' + esc(o.origenRegistro) : ''}</span>${fVar(o, p)}</div>
+      ${o.nota ? `<div class="nota">${esc(o.nota)}</div>` : ''}
+    </div>`;
+  }).join('');
+  const cols = t.operativos.length <= 2 ? t.operativos.length : t.operativos.length === 4 ? 2 : 3;
+  return {
+    id: `tactico-${ti}`, titulo: t.def.nombre, estado: t.estado, narrativa: n,
+    html: `${encabezado(`Táctico ${ti + 1} · ${t.def.nombre}`, n)}
+      <div class="cuerpo" style="grid-template-columns: 26% 1fr;">
+        <div class="tarjeta azul" style="align-items:center; gap:.5em">
+          <div style="flex:1; width:100%; min-height:0">${htmlDona(t.resultado, colorEstado(t.estado), t.resultado == null ? '—' : fPct(t.resultado), t.resultado == null ? 'SIN MEDICIÓN COMPLETA' : 'RESULTADO')}</div>
+          <div class="metricas" style="width:100%"><div><small>META</small><b>${fPct(t.def.meta ?? 1, 0)}</b></div><div><small>BRECHA</small><b>${fBrecha(t.resultado, t.def.meta ?? 1)}</b></div><div><small>PESO</small><b>${fPct(t.def.peso, 0)}</b></div></div>
+          <div style="font-size:.75em; color:var(--tinta-2)">${plural(t.operativos.length, 'operativo')} · ${pill(t.estado)}</div>
+          ${t.problemas.length ? `<div class="vacio" style="text-align:center">${esc(cap(t.problemas.join('; ')))}</div>` : ''}
+        </div>
+        <div class="rejilla-ops" style="display:grid; grid-template-columns: repeat(${cols}, 1fr); grid-auto-rows: 1fr; gap:.7em; min-height:0">${ops}</div>
+      </div>
+      ${htmlNarrativa(`tactico-${ti}`, n)}`
+  };
+}
+
+function slideContingencia(ctx) {
+  const c = ctx.res.contingencia; const n = narrarContingencia(ctx);
+  // Cascada: procesos en contra cerrados en el año con valor final (misma base de la efectividad económica).
+  const ini = Motor.dia(S.anio, 1, 1), fin = ctx.res.rango.fin;
+  const cerr = S.modelo.casos.filter((x) => x.posicion === 'EN CONTRA' && x.respuesta != null && x.respuesta >= ini && x.respuesta <= fin && (x.pretendido || 0) > 0 && x.valorFinal != null);
+  const sp = cerr.reduce((a, x) => a + x.pretendido, 0), sf = cerr.reduce((a, x) => a + x.valorFinal, 0);
+  const optCascada = {
+    grid: { left: 70, right: 10, top: 18, bottom: 24 },
+    tooltip: { ...tooltipBase, trigger: 'axis', axisPointer: { type: 'shadow' }, formatter: (p) => { const v = p.find((x) => x.seriesName === 'valor'); return `${v.name}: <b>${fPesos(v.value)}</b>`; } },
+    xAxis: ejeCat(['Pretendido', 'Ahorro logrado', 'Valor final']),
+    yAxis: ejeVal({ axisLabel: { color: COLOR.tinta3, fontSize: 10, formatter: (v) => '$' + fNum(v / 1e6) + ' M' } }),
+    series: [
+      { type: 'bar', stack: 'c', name: 'base', silent: true, itemStyle: { color: 'transparent' }, data: [0, sf, 0] },
+      { type: 'bar', stack: 'c', name: 'valor', barMaxWidth: 46, label: { show: true, position: 'top', fontSize: 10, color: COLOR.azul, formatter: (p) => fMill(p.value).replace(' millones', ' M') },
+        data: [{ value: sp, itemStyle: { color: COLOR.azul, borderRadius: [4, 4, 0, 0] } }, { value: sp - sf, itemStyle: { color: COLOR.verde, borderRadius: [4, 4, 0, 0] } }, { value: sf, itemStyle: { color: COLOR.gris, borderRadius: [4, 4, 0, 0] } }] }
+    ]
+  };
+  const zonas = [[1, 1, 2], [1, 2, 3], [2, 3, 3]];
+  const matriz = `<div class="matriz"><div></div>${['Remoto', 'Posible', 'Probable'].map((p) => `<div class="h">${p}</div>`).join('')}
+    ${['ALTO', 'MEDIO', 'BAJO'].map((ri) => { const r = ['BAJO', 'MEDIO', 'ALTO'].indexOf(ri);
+      return `<div class="h">${cap(ri.toLowerCase())}</div>` + [0, 1, 2].map((p) => `<button class="z${zonas[r][p]}" data-matriz="${r}:${p}" title="Riesgo ${ri.toLowerCase()} · ${['remoto', 'posible', 'probable'][p]}">${c.matriz[r][p].length || ''}</button>`).join(''); }).join('')}</div>`;
+  const filas = c.procesos.slice(0, 6).map((p) => `<tr><td>${esc(p.id)}</td><td>${esc(p.nombre)}<br><small style="color:var(--tinta-3)">${esc(clasTxt(p.clas))} · ${esc(p.sede.toLowerCase())}</small></td><td class="n">${fMill(p.pretendido)}</td><td>${esc(cap(p.prob.toLowerCase()))}${p.pct != null ? ' ' + fPct(p.pct, 0) : ''}</td><td class="n">${p.reserva ? fMill(p.reserva) : '—'}</td></tr>`).join('');
+  return {
+    id: 'contingencia', titulo: 'Contingencia jurídica', estado: n.estado, narrativa: n,
+    html: `${encabezado('Control del riesgo y la contingencia jurídica', n)}
+      <div class="cuerpo" style="grid-template-columns: 1fr 1fr 1fr 1fr; grid-template-rows: auto 1fr;">
+        <div class="tarjeta kpi azul"><small>Exposición en contra</small><b>${fMill(c.exposicion)}</b><span>${plural(c.procesos.length, 'proceso')} · ${plural(c.abiertos, 'caso abierto', 'casos abiertos')} al corte</span></div>
+        <div class="tarjeta kpi" style="border-left:.25em solid var(--rojo)"><small>A provisionar</small><b>${fMill(c.provision)}</b><span>Probabilidad probable</span></div>
+        <div class="tarjeta kpi" style="border-left:.25em solid var(--ambar)"><small>Revelar en nota</small><b>${fMill(c.nota)}</b><span>Probabilidad posible</span></div>
+        <div class="tarjeta kpi"><small>Por valorar</small><b>${fNum(c.porValorar.length)}</b><span>casos abiertos sin valoración</span></div>
+        <div class="tarjeta"><h3>Pretendido → ahorro → valor final (cerrados en ${S.anio})</h3>${cerr.length ? G(optCascada) : '<div class="vacio">No hay procesos en contra cerrados con valor final registrado en el año.</div>'}</div>
+        <div class="tarjeta"><h3>Riesgo jurídico × probabilidad (abiertos)</h3>${matriz}</div>
+        <div class="tarjeta" style="grid-column: span 2"><h3>Procesos con valor, ordenados por reserva</h3>
+          <div class="desliza">${filas ? `<table class="tabla"><thead><tr><th>No.</th><th>Proceso</th><th class="n">Pretendido</th><th>Probabilidad</th><th class="n">Reserva</th></tr></thead><tbody>${filas}</tbody></table>` : '<div class="vacio">Sin procesos con valor al corte.</div>'}</div></div>
+      </div>
+      ${htmlNarrativa('contingencia', n)}`
+  };
+}
+
+function slideAtencion(ctx) {
+  const a = ctx.res.atencion; const n = narrarAtencion(ctx);
+  const li = (c, extra) => `<li><b>No. ${esc(c.id)}</b> · ${esc(clasTxt(c.clas))} · ${esc(c.sede.toLowerCase())}<small>${esc(c.nombre)} — ${extra}</small></li>`;
+  const col = (titulo, cifra, items, color, lista) => `<div class="tarjeta" style="border-top:.25em solid ${color}">
+      <h3>${titulo}</h3><div class="cifra">${fNum(cifra)}</div>
+      ${items ? `<ul class="lista">${items}</ul>` : '<div class="vacio">Sin casos.</div>'}
+      ${cifra ? `<button class="mini-btn no-pres" data-lista="${lista}">Ver detalle (${fNum(cifra)})</button>` : ''}
+    </div>`;
+  return {
+    id: 'atencion', titulo: 'Casos que requieren atención', estado: n.estado, narrativa: n,
+    html: `${encabezado('Casos que requieren atención', n)}
+      <div class="cuerpo" style="grid-template-columns: repeat(3, 1fr);">
+        ${col('Vencidos frente al ANS (sin pendiente de otro proceso)', a.vencidos.length, a.vencidos.slice(0, 8).map((x) => li(x.c, `${plural(x.dias, 'día hábil', 'días hábiles')} de atraso · ANS ${x.c.ans} d`)).join(''), COLOR.rojo, 'vencidos')}
+        ${col('Casos por valorar el riesgo', a.porValorar.length, a.porValorar.slice(0, 8).map((c) => li(c, `recibido ${fFecha(c.recibido)}`)).join(''), COLOR.ambar, 'porValorar')}
+        ${col(`Términos legales a ≤ ${CONFIG.diasProximoVencer} días hábiles o vencidos`, a.terminos.length, a.terminos.slice(0, 8).map((x) => li(x.c, `límite ${fFecha(x.limite)} · ${x.restan < 0 ? 'vencido hace ' + plural(-x.restan, 'día hábil', 'días hábiles') : x.restan === 0 ? 'vence hoy' : 'faltan ' + plural(x.restan, 'día hábil', 'días hábiles')}`)).join(''), COLOR.azul, 'terminos')}
+      </div>
+      ${htmlNarrativa('atencion', n)}`
+  };
+}
+
+function slideVolumen(ctx) {
+  const v = ctx.res.volumen; const n = narrarVolumen(ctx);
+  const optMes = {
+    grid: { left: 36, right: 10, top: 30, bottom: 22 },
+    legend: { top: 0, right: 0, itemWidth: 12, itemHeight: 10, textStyle: { fontSize: 11, color: COLOR.tinta2 } },
+    tooltip: { ...tooltipBase, trigger: 'axis', axisPointer: { type: 'shadow' } },
+    xAxis: ejeCat(MESES_C), yAxis: ejeVal({ minInterval: 1 }),
+    series: [
+      { name: 'Recibidos', type: 'bar', barGap: '8%', barMaxWidth: 16, itemStyle: { color: COLOR.azul, borderRadius: [3, 3, 0, 0] }, data: v.mensual.map((x) => x.recibidos) },
+      { name: 'Cerrados', type: 'bar', barMaxWidth: 16, itemStyle: { color: COLOR.serie2, borderRadius: [3, 3, 0, 0] }, data: v.mensual.map((x) => x.cerrados) }
+    ]
+  };
+  const barrasH = (obj, color) => {
+    const e = Object.entries(obj).sort((a, b) => a[1] - b[1]).slice(-8);
+    return {
+      grid: { left: 8, right: 34, top: 4, bottom: 4, containLabel: true },
+      tooltip: { ...tooltipBase, trigger: 'item', formatter: (p) => `${cap(p.name.toLowerCase())}: <b>${p.value}</b>` },
+      xAxis: { type: 'value', show: false }, yAxis: ejeCat(e.map((x) => x[0]), { axisLabel: { color: COLOR.tinta2, fontSize: 10, formatter: (s) => { const t = cap(s.toLowerCase()); return t.length > 24 ? t.slice(0, 23) + '…' : t; } } }),
+      series: [{ type: 'bar', barMaxWidth: 14, data: e.map((x) => x[1]), itemStyle: { color, borderRadius: [0, 3, 3, 0] }, label: { show: true, position: 'right', fontSize: 10, color: COLOR.azul } }]
+    };
+  };
+  return {
+    id: 'volumen', titulo: 'Volumen y carga', estado: 'sin', narrativa: n,
+    html: `${encabezado('Volumen y carga de trabajo', n)}
+      <div class="cuerpo" style="grid-template-columns: 1.35fr 1fr 1fr;">
+        <div class="tarjeta"><h3>Recibidos vs. cerrados por mes · ${S.anio}</h3>${G(optMes)}</div>
+        <div class="tarjeta"><h3>Recibidos por clasificación · ${esc(perCorto(S.anio, S.mes))}</h3>${Object.keys(v.porClasRec).length ? G(barrasH(v.porClasRec, COLOR.azul)) : '<div class="vacio">Sin casos.</div>'}</div>
+        <div class="tarjeta"><h3>Recibidos por sede · ${esc(perCorto(S.anio, S.mes))}</h3>${Object.keys(v.porSede).length ? G(barrasH(v.porSede, COLOR.azul)) : '<div class="vacio">Sin casos.</div>'}</div>
+      </div>
+      ${htmlNarrativa('volumen', n)}`
+  };
+}
+
+function slideCalidad(ctx) {
+  const q = S.modelo.calidad;
+  const tipos = {}; q.forEach((x) => { tipos[x.tipo] = (tipos[x.tipo] || 0) + 1; });
+  const n = { clave: q.length ? `${plural(q.length, 'observación', 'observaciones')} de calidad de datos` : 'Sin observaciones de calidad de datos', estado: q.length ? 'alerta' : 'cumple', frases: [] };
+  return {
+    id: 'calidad', titulo: 'Calidad de datos', estado: n.estado, soloTablero: true,
+    html: `${encabezado('Calidad de datos (solo en modo tablero)', n)}
+      <div class="cuerpo" style="grid-template-columns: 28% 1fr;">
+        <div class="tarjeta azul"><h3>Por tipo</h3><ul class="lista">${Object.entries(tipos).sort((a, b) => b[1] - a[1]).map(([t, k]) => `<li><b>${fNum(k)}</b> · ${esc(t)}</li>`).join('') || '<li>Sin observaciones.</li>'}</ul>
+          <div class="vacio">ANS tomados de: ${esc(S.modelo.fuenteANS)}. Casos leídos: ${fNum(S.modelo.casos.length)}.</div></div>
+        <div class="tarjeta"><h3>Detalle</h3><div class="desliza"><table class="tabla"><thead><tr><th>Fila</th><th>No.</th><th>Tipo</th><th>Detalle</th></tr></thead><tbody>
+          ${q.map((x) => `<tr><td>${esc(x.fila)}</td><td>${esc(x.id)}</td><td>${esc(x.tipo)}</td><td>${esc(x.detalle)}</td></tr>`).join('')}</tbody></table></div></div>
+      </div>`
+  };
+}
+
+function slideConclusiones(ctx, previas) {
+  const alertas = [];
+  previas.forEach((s) => (s.narrativa?.todas || []).forEach((f) => { if (['incumple', 'falta', 'deterioro', 'riesgo'].includes(f.nivel)) alertas.push({ ...f, origen: s.titulo }); }));
+  alertas.sort((a, b) => PRIORIDAD[a.nivel] - PRIORIDAD[b.nivel]);
+  // Decisiones requeridas (determinísticas)
+  const dec = [];
+  const c = ctx.res.contingencia, a = ctx.res.atencion;
+  if (c.provision > 0) dec.push(`Aprobar la provisión contable de ${fMill(c.provision)} por procesos calificados como probables.`);
+  if (c.nota > 0) dec.push(`Incluir la revelación en notas a los estados financieros por ${fMill(c.nota)} (procesos posibles).`);
+  if (c.porValorar.length) dec.push(`Completar la valoración del riesgo de ${plural(c.porValorar.length, 'caso abierto', 'casos abiertos')}.`);
+  if (a.vencidos.length) dec.push(`Definir plan de cierre para ${plural(a.vencidos.length, 'caso vencido', 'casos vencidos')} frente al ANS.`);
+  ctx.res.tacticos.filter((t) => t.resultado == null).forEach((t) => dec.push(`Registrar la información faltante de «${t.def.nombre}» (${t.problemas.join('; ')}).`));
+  const comentarios = ctx.res.tacticos.flatMap((t) => t.operativos.filter((o) => o.comentario).map((o) => `<li><b>${esc(o.def.nombre)}:</b> ${esc(o.comentario)}</li>`));
+  const manuales = previas.filter((s) => textoManual(s.id)).map((s) => `<li><b>${esc(s.titulo)}:</b> ${esc(textoManual(s.id).texto)}</li>`);
+  const n = { clave: alertas.length ? `${plural(alertas.length, 'alerta')} y ${plural(dec.length, 'decisión', 'decisiones')} para la Gerencia` : 'La gestión jurídica no presenta alertas en el periodo', estado: alertas.some((x) => x.nivel === 'incumple') ? 'nocumple' : alertas.length ? 'alerta' : 'cumple', frases: [] };
+  return {
+    id: 'conclusiones', titulo: 'Conclusiones y decisiones', estado: n.estado,
+    html: `${encabezado('Conclusiones y decisiones', n)}
+      <div class="cuerpo" style="grid-template-columns: 1.2fr 1fr;">
+        <div class="tarjeta"><h3>Alertas del periodo</h3><ul class="lista alertas">${alertas.map((x) => `<li class="${x.nivel === 'riesgo' ? 'riesgo' : ''}">${esc(x.t)} <small>${esc(x.origen)}</small></li>`).join('') || '<li class="decision">Sin alertas.</li>'}</ul></div>
+        <div class="tarjeta azul"><h3>Decisiones requeridas</h3><ul class="lista alertas">${dec.map((d) => `<li class="decision">${esc(d)}</li>`).join('') || '<li class="decision">No se requieren decisiones en este periodo.</li>'}</ul>
+          ${comentarios.length || manuales.length ? `<h3 style="margin-top:.6em">Comentarios del responsable</h3><ul class="lista">${comentarios.join('')}${manuales.join('')}</ul>` : ''}</div>
+      </div>`
+  };
+}
+
+// ---------------------------------------------------------------- dibujo
+function dibujar() {
+  if (!S.modelo) return;
+  S.graficos.forEach((g) => g.dispose()); S.graficos = [];
+  gid = 0;
+  const ctx = contexto();
+  const constructores = [() => slidePortada(ctx), () => slideResumen(ctx), ...ctx.res.tacticos.map((_, i) => () => slideTactico(ctx, i)),
+    () => slideContingencia(ctx), () => slideAtencion(ctx), () => slideVolumen(ctx), () => slideCalidad(ctx)];
+  const slides = [];
+  const esc_ = document.getElementById('escenario'); esc_.innerHTML = '';
+  const total = constructores.length + 1;
+  const crear = (s, i) => {
+    const el = document.createElement('section');
+    el.className = `slide ${s.cls || ''} ${s.soloTablero ? 'solo-tablero' : ''}`;
+    el.dataset.id = s.id;
+    el.innerHTML = `<div class="lienzo">${s.html}</div><div class="pie">Proceso Jurídico · ${esc(perCorto(S.anio, S.mes))} · ${i + 1} / ${total}</div>`;
+    el._pend = pendientes; pendientes = [];
+    esc_.appendChild(el); s.el = el; slides.push(s);
+  };
+  constructores.forEach((f, i) => crear(f(), i));
+  crear(slideConclusiones(ctx, slides), slides.length);
+  S.slides = slides;
+  // Miniaturas
+  document.getElementById('miniaturas').innerHTML = slides.map((s, i) =>
+    `<button data-i="${i}" class="${s.soloTablero ? 'no-pres' : ''}"><i style="background:${colorEstado(s.estado)}"></i><span>${i + 1}</span> ${esc(s.titulo.length > 42 ? s.titulo.slice(0, 40) + '…' : s.titulo)}</button>`).join('');
+  S.idx = Math.min(S.idx, slides.length - 1);
+  mostrar(S.idx);
+  marcarVivo();
+}
+function iniciarGraficos(el) {
+  (el._pend || []).forEach((p) => { const c = el.querySelector('#' + p.id); if (c) grafico(c, p.opcion); });
+  el._pend = [];
+}
+const visibles = () => S.slides.map((s, i) => i).filter((i) => !(S.slides[i].soloTablero && document.body.classList.contains('presentacion')));
+function mostrar(i) {
+  if (!S.slides.length) return;
+  S.idx = Math.max(0, Math.min(i, S.slides.length - 1));
+  S.slides.forEach((s, k) => s.el.classList.toggle('activa', k === S.idx));
+  const el = S.slides[S.idx].el;
+  iniciarGraficos(el);
+  requestAnimationFrame(() => S.graficos.forEach((g) => { if (el.contains(g.getDom())) g.resize(); }));
+  document.querySelectorAll('#miniaturas button').forEach((b) => b.classList.toggle('activa', +b.dataset.i === S.idx));
+  document.querySelector(`#miniaturas button[data-i="${S.idx}"]`)?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+}
+function mover(d) {
+  const v = visibles(); const pos = v.indexOf(S.idx);
+  const nuevo = v[Math.max(0, Math.min(v.length - 1, (pos < 0 ? 0 : pos) + d))];
+  if (nuevo != null) mostrar(nuevo);
+}
+
+// ---------------------------------------------------------------- panel de casos
+function abrirPanel(titulo, sub, filas) {
+  document.getElementById('panelTitulo').innerHTML = `${esc(titulo)}<p>${esc(sub)}</p>`;
+  document.getElementById('panelContenido').innerHTML = filas.length ? `<table><thead><tr><th>No.</th><th>Caso</th><th>Recibido</th><th>Respuesta</th><th>Detalle</th><th></th></tr></thead><tbody>
+    ${filas.map((x) => `<tr class="${x.ok === false ? 'mal' : ''}"><td>${esc(x.c.id)}</td><td><b>${esc(x.c.clasOrig)}</b><br>${esc(x.c.nombre)}<br><small style="color:var(--tinta-3)">${esc(x.c.sede.toLowerCase())} · ${esc(x.c.estado.toLowerCase())}</small>${x.c.asunto ? `<br><small style="color:var(--tinta-2)" title="${esc(x.c.asunto)}">${esc(x.c.asunto.slice(0, 160))}${x.c.asunto.length > 160 ? '…' : ''}</small>` : ''}</td>
+      <td>${fFecha(x.c.recibido)}</td><td>${fFecha(x.c.respuesta)}</td><td>${esc(x.detalle || '')}</td><td>${x.ok === false ? '<span class="estado nocumple">✕</span>' : x.ok === true ? '<span class="estado cumple">✓</span>' : ''}</td></tr>`).join('')}</tbody></table>` : '<p class="vacio">No hay casos para mostrar.</p>';
+  document.getElementById('panel').classList.add('abierto');
+  document.getElementById('panel').setAttribute('aria-hidden', 'false');
+  document.getElementById('velo').hidden = false;
+}
+function cerrarPanel() {
+  document.getElementById('panel').classList.remove('abierto');
+  document.getElementById('panel').setAttribute('aria-hidden', 'true');
+  document.getElementById('velo').hidden = true;
+}
+
+// ---------------------------------------------------------------- exportar
+async function exportarPDF() {
+  document.body.classList.add('imprimiendo');
+  S.slides.forEach((s) => iniciarGraficos(s.el));
+  await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+  S.graficos.forEach((g) => { g.setOption({ animation: false }); g.resize(); });
+  await new Promise((r) => setTimeout(r, 250));
+  window.print();
+}
+window.addEventListener('afterprint', () => {
+  document.body.classList.remove('imprimiendo');
+  S.graficos.forEach((g) => g.resize());
+  mostrar(S.idx);
+});
+async function exportarPNG() {
+  if (!window.html2canvas) { toast('El módulo de imagen aún no carga; intente de nuevo.'); return; }
+  const el = S.slides[S.idx].el;
+  const lienzo = await html2canvas(el, { scale: 2, backgroundColor: '#ffffff', useCORS: true, ignoreElements: (n) => n.classList && n.classList.contains('editar') });
+  const a = document.createElement('a');
+  a.download = `Juridico_${perCorto(S.anio, S.mes).replace(/\s+/g, '_')}_${S.idx + 1}_${S.slides[S.idx].id}.png`;
+  a.href = lienzo.toDataURL('image/png'); a.click();
+}
+function exportarTextos() {
+  const blob = new Blob([JSON.stringify(S.narrativa, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a'); a.download = 'narrativa_manual.json'; a.href = URL.createObjectURL(blob); a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+}
+
+// ---------------------------------------------------------------- eventos
+const $ = (id) => document.getElementById(id);
+$('btnElegir').onclick = () => $('inpArchivos').click();
+$('inpArchivos').onchange = async (e) => { const t = await cargarListaArchivos(e.target.files); e.target.value = ''; if (t.length) reconstruir(); };
+$('btnVincular').hidden = !puedeVincular;
+$('btnVincular').onclick = vincular;
+$('btnVolver').onclick = mostrarTablero;
+$('btnArchivos').onclick = mostrarCarga;
+$('btnReanudar').onclick = reanudar;
+$('btnTextos').onclick = exportarTextos;
+$('btnPDF').onclick = exportarPDF;
+$('btnPNG').onclick = exportarPNG;
+$('btnPresentar').onclick = () => alternarPresentacion();
+$('lnkOlvidar').onclick = async (e) => {
+  e.preventDefault(); await IDB.limpiar(); S.archivos = {}; S.modelo = null; S.vigilando = false; clearInterval(S.temporizador);
+  pintarFuentes(); mostrarCarga(); toast('Archivos olvidados en este navegador.');
+};
+$('selAnio').onchange = (e) => { S.anio = +e.target.value; dibujar(); };
+$('selMes').onchange = (e) => { S.mes = +e.target.value; dibujar(); };
+$('chkParcial').onchange = (e) => { S.modelo.config.modoParcial = e.target.checked; S.modelo.cache = {}; dibujar(); };
+$('panelCerrar').onclick = cerrarPanel;
+$('velo').onclick = cerrarPanel;
+$('miniaturas').onclick = (e) => { const b = e.target.closest('button[data-i]'); if (b) mostrar(+b.dataset.i); };
+
+// Arrastrar y soltar
+const zona = $('zona');
+['dragenter', 'dragover'].forEach((ev) => document.addEventListener(ev, (e) => { e.preventDefault(); zona.classList.add('encima'); }));
+['dragleave', 'drop'].forEach((ev) => document.addEventListener(ev, (e) => { e.preventDefault(); if (ev === 'drop' || !e.relatedTarget) zona.classList.remove('encima'); }));
+document.addEventListener('drop', async (e) => {
+  const items = [...(e.dataTransfer?.items || [])];
+  let handles = null;
+  // En Edge/Chrome el archivo soltado también puede vigilarse.
+  if (puedeVincular && items.length && items[0].getAsFileSystemHandle) {
+    try { handles = await Promise.all(items.map((it) => it.getAsFileSystemHandle())); } catch (er) { handles = null; }
+  }
+  const files = [...(e.dataTransfer?.files || [])];
+  if (!files.length) return;
+  const t = await cargarListaArchivos(files, handles && handles.every((h) => h && h.kind === 'file') ? handles : null);
+  if (t.length) { reconstruir(); iniciarVigilancia(); }
+});
+
+// Clics dentro de las diapositivas
+$('escenario').addEventListener('click', (e) => {
+  const ed = e.target.closest('[data-editar]'); if (ed) { abrirEdicion(ed.dataset.editar); return; }
+  const ir = e.target.closest('[data-ir]'); if (ir) { const i = S.slides.findIndex((s) => s.id === ir.dataset.ir); if (i >= 0) mostrar(i); return; }
+  const res = Motor.calcular(S.modelo, S.anio, S.mes);
+  const cs = e.target.closest('[data-casos]');
+  if (cs) {
+    const [ti, oi] = cs.dataset.casos.split(':').map(Number); const o = res.tacticos[ti].operativos[oi];
+    const filas = o.casos.slice().sort((a, b) => (a.ok === b.ok ? 0 : a.ok ? 1 : -1));
+    abrirPanel(o.def.nombre, `${cap(perTxt(S.anio, S.mes))} · ${fValor(o, o.valor)} · meta ${fMeta(o)}${o.def.formula ? ' · ' + o.def.formula : ''}`, filas);
+    return;
+  }
+  const mz = e.target.closest('[data-matriz]');
+  if (mz) { const [r, p] = mz.dataset.matriz.split(':').map(Number); const ri = ['bajo', 'medio', 'alto'][r], pr = ['remoto', 'posible', 'probable'][p];
+    abrirPanel(`Riesgo ${ri} · probabilidad ${pr}`, `Casos abiertos al ${fFecha(res.rango.fin)}`, res.contingencia.matriz[r][p].map((c) => ({ c, detalle: `Pretendido ${fMill(c.pretendido)} · reserva ${fMill(c.reserva)}` }))); return; }
+  const ls = e.target.closest('[data-lista]');
+  if (ls) {
+    const a = res.atencion; const k = ls.dataset.lista;
+    if (k === 'vencidos') abrirPanel('Vencidos frente al ANS', `Referencia ${fFecha(a.ref)}`, a.vencidos.map((x) => ({ c: x.c, ok: false, detalle: `Venció ${fFecha(x.c.venceANS)} · ${plural(x.dias, 'día hábil', 'días hábiles')} de atraso` })));
+    if (k === 'porValorar') abrirPanel('Casos por valorar', 'Sin valores o factores de probabilidad completos', a.porValorar.map((c) => ({ c, ok: false, detalle: 'Por valorar' })));
+    if (k === 'terminos') abrirPanel('Términos legales', `Vencidos o a ≤ ${CONFIG.diasProximoVencer} días hábiles`, a.terminos.map((x) => ({ c: x.c, ok: x.restan >= 0, detalle: `Límite ${fFecha(x.limite)}` })));
+  }
+});
+$('escenario').addEventListener('keydown', (e) => { if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('[data-casos]')) { e.preventDefault(); e.target.click(); } });
+
+function alternarPresentacion(forzar) {
+  const on = forzar ?? !document.body.classList.contains('presentacion');
+  document.body.classList.toggle('presentacion', on);
+  if (on && S.slides[S.idx]?.soloTablero) mover(1);
+  setTimeout(() => S.graficos.forEach((g) => g.resize()), 50);
+}
+document.addEventListener('keydown', (e) => {
+  if (!S.modelo || $('app').hidden) return;
+  if (e.target.closest('input, textarea, select, dialog') || $('dlgTexto').open) return;
+  if (e.key === 'Escape' && $('panel').classList.contains('abierto')) { cerrarPanel(); return; }
+  if (['ArrowRight', 'PageDown', ' '].includes(e.key)) { e.preventDefault(); mover(1); }
+  else if (['ArrowLeft', 'PageUp'].includes(e.key)) { e.preventDefault(); mover(-1); }
+  else if (e.key === 'Home') mostrar(0);
+  else if (e.key === 'End') mostrar(S.slides.length - 1);
+  else if (e.key.toLowerCase() === 'f') { if (document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen?.(); }
+  else if (e.key.toLowerCase() === 'p') alternarPresentacion();
+  else if (e.key === 'Escape' && document.body.classList.contains('presentacion')) alternarPresentacion(false);
+});
+document.addEventListener('fullscreenchange', () => setTimeout(() => S.graficos.forEach((g) => g.resize()), 80));
+let tRes; window.addEventListener('resize', () => { clearTimeout(tRes); tRes = setTimeout(() => S.graficos.forEach((g) => g.resize()), 120); });
+
+// ---------------------------------------------------------------- inicio
+(async function iniciar() {
+  if (!window.XLSX || !window.echarts || !window.Motor) { document.querySelector('.carga .sub').textContent = 'No se pudieron cargar las librerías. Revise la conexión a internet y recargue la página.'; return; }
+  const n = leerLocal('tj-narrativa'); if (n && n.textos) S.narrativa = n;
+  const guardados = await IDB.todos();
+  Object.assign(S.archivos, guardados);
+  const conHandle = Object.values(S.archivos).filter((a) => a.handle);
+  if (S.archivos.gh47) {
+    reconstruir();
+    if (conHandle.length) {
+      let ok = true;
+      for (const a of conHandle) { try { if ((await a.handle.queryPermission({ mode: 'read' })) !== 'granted') ok = false; } catch (e) { ok = false; } }
+      if (ok) { await revisarCambios(); iniciarVigilancia(); } else $('btnReanudar').hidden = false;
+    }
+  } else mostrarCarga();
+})();
+</script>
+</body>
+</html>

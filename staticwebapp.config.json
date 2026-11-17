@@ -1,0 +1,21 @@
+{
+  "routes": [
+    { "route": "/datos/*", "statusCode": 404 },
+    { "route": "/bandeja/*", "statusCode": 404 },
+    { "route": "/respaldos/*", "statusCode": 404 },
+    { "route": "/config/*", "statusCode": 404 },
+    { "route": "/pruebas/*", "statusCode": 404 },
+    { "route": "/*.xlsx", "statusCode": 404 },
+    { "route": "/*.json", "statusCode": 404 },
+    { "route": "/*.md", "statusCode": 404 }
+  ],
+  "globalHeaders": {
+    "X-Content-Type-Options": "nosniff",
+    "Referrer-Policy": "same-origin",
+    "X-Frame-Options": "DENY",
+    "Content-Security-Policy": "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'"
+  },
+  "mimeTypes": {
+    "js": "text/javascript"
+  }
+}
